@@ -111,3 +111,6 @@ venv.bak/
 /data.db
 /build/
 /dist/
+/config.dat
+/config.bak
+/config.dir
