@@ -30,7 +30,8 @@ windows = []
 current_user = ""
 
 contact_table_Headers = ["Title", "Select", "Type"]
-log_table_headers = ["Contacts", "Date", "Messsage"]
+log_table_headers = ["Contacts", "Date", "Message"]
+message_templates_table_header = ["Id", "Message", "Select"]
 
 
 # class ContactsTableModel(QAbstractTableModel):
@@ -116,7 +117,6 @@ class extendmain(maingui.Ui_MainWindow):
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
-
 
     def removeaccount(self):
         os.remove("00000001.jpg")
@@ -392,15 +392,21 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
         self.loadmessages()
         # self.table_template.dataChanged.connect(self.updatetable)
         self.model.dataChanged.connect(self.dataChanged)
-        self.table_template.doubleClicked.connect(self.select_template)
+        # self.table_template.doubleClicked.connect(self.select_template)
         self.table_template.setWordWrap(True)
         self.table_template.resizeRowsToContents()
+        self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
         # self.buttonBox.accepted.connect(self.accept)
 
-    def select_template(self, index):
-        msg = self.model.data(self.model.index(index.row(), 1))
-        self.mainui.txt_msg.setPlainText(msg)
-        self.TemplateObj.close()
+    def select_template(self):
+        try:
+            button = self.qbutton.sender()
+            index = self.table_template.indexAt(button.pos())
+            msg = self.model.data(self.model.index(index.row(), 1))
+            self.mainui.txt_msg.setPlainText(msg)
+            self.TemplateObj.close()
+        except Exception as e:
+            print(e)
 
     def dataChanged(self, index):
         msg = self.model.data(index)
@@ -414,17 +420,26 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             self.model = QStandardItemModel(self.table_template)
             # self.contacts_table.itemChanged.connect(self.itemChanged)
             self.table_template.setModel(self.model)
-            for value in result:
+            for idx, value in enumerate(result):
                 row1 = []
                 # print(value)
-                i = 0
-                for item in value:
-                    cell = QStandardItem(str(item))
-                    if i == 0:
-                        cell.setFlags(QtCore.Qt.ItemIsEnabled)
-                    row1.append(cell)
-                    i += 1
+                # for i,item in enumerate(value):
+                #     cell = QStandardItem(str(item))
+                #     if i == 0:
+                #         cell.setFlags(QtCore.Qt.ItemIsEnabled)
+                #     row1.append(cell)
+                cell = QStandardItem(str(value[0]))
+                cell.setFlags(QtCore.Qt.ItemIsEnabled)
+                row1.append(cell)
+                cell = QStandardItem(str(value[1]))
+                row1.append(cell)
+                cell = QStandardItem()
+                row1.append(cell)
                 self.model.appendRow(row1)
+                self.qbutton = QtWidgets.QToolButton()
+                self.qbutton.setIcon(QtGui.QIcon("imgs/select.png"))
+                self.qbutton.clicked.connect(self.select_template)
+                self.table_template.setIndexWidget(self.model.index(idx, 2), self.qbutton)
 
             # item = QtGui.QStandardItem("Click me")
             # item.setCheckable(True)
@@ -433,6 +448,8 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             if self.table_template.model().rowCount() != 0:
                 header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
                 header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+                header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+
         except Exception as e:
             print(e)
 
