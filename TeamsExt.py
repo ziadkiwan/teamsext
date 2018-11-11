@@ -2,7 +2,7 @@ import os
 import shelve
 import urllib as urllib
 
-from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt
+from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMessageBox
 from Loadingdialog import Ui_Dialog as loadingui
@@ -304,11 +304,12 @@ class extendmain(maingui.Ui_MainWindow):
             self.contacts_table.setModel(self.model)
             for value in result:
                 row = []
-                i = 0
-                for item in value:
+                for i,item in enumerate(value):
                     if i == 1:
                         cell = QStandardItem()
                         cell.setCheckable(True)
+                        cell.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                        cell.setData(QVariant(Qt.Checked), Qt.CheckStateRole)
                         if "no" in item:
                             cell.setCheckState(False)
                         else:
@@ -318,12 +319,12 @@ class extendmain(maingui.Ui_MainWindow):
                         cell.setFlags(QtCore.Qt.ItemIsEnabled)
 
                     row.append(cell)
-                    i += 1
                 self.model.appendRow(row)
             # item = QtGui.QStandardItem("Click me")
             # item.setCheckable(True)
             # self.contacts_table.appendRow(item)
             self.contacts_table.model().setHorizontalHeaderLabels(contact_table_Headers)
+            # self.contacts_table.setFocusPolicy(QtCore.Qt.NoFocus)
             header = self.contacts_table.horizontalHeader()
             header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
             header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
