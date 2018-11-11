@@ -8,7 +8,6 @@ import contact as ctct
 
 db_file = "data.db"
 
-
 create_users_sql = """CREATE TABLE `users` (
 	`id`	INTEGER PRIMARY KEY AUTOINCREMENT,
 	`email`	TEXT,
@@ -62,7 +61,6 @@ def closecon(conn):
 
 
 def insert_user_info(user_info):
-
     try:
         conn = create_connection()
         sql = " INSERT INTO users(email,displayname,nickname,avatar) VALUES('{0}','{1}','{2}','{3}') ".format(
@@ -75,7 +73,6 @@ def insert_user_info(user_info):
         print(e)
     finally:
         closecon(conn)
-
 
 
 def insert_contact(contact):
@@ -93,7 +90,6 @@ def insert_contact(contact):
         print(e)
     finally:
         closecon(conn)
-
 
 
 def create_tables():
@@ -153,6 +149,7 @@ def select_all_contacts():
     finally:
         closecon(conn)
 
+
 def select_groups_contacts():
     try:
         conn = create_connection()
@@ -171,7 +168,6 @@ def select_groups_contacts():
     #     all.append(current_user)
 
 
-
 def get_all_msg_templates():
     try:
         conn = create_connection()
@@ -188,7 +184,6 @@ def get_all_msg_templates():
     #     current_user = ctct.contact(id=row[0], title=row[1], selected=row[2],
     #                                 type=row[3])
     #     all.append(current_user)
-
 
 
 def save_template(message):
@@ -210,7 +205,6 @@ def save_template(message):
         closecon(conn)
 
 
-
 def update_text(id, message):
     try:
         conn = create_connection()
@@ -222,7 +216,6 @@ def update_text(id, message):
         print(e)
     finally:
         closecon(conn)
-
 
 
 def get_id_by_contact_name(contact_name):
@@ -244,9 +237,8 @@ def get_id_by_contact_name(contact_name):
     #     all.append(current_user)
 
 
-
 def insert_log(ids, message):
-   # message = message.replace("\n", "<br>")
+    # message = message.replace("\n", "<br>")
     contactsstr = ""
     idsstr = ""
     i = 0
@@ -274,7 +266,6 @@ def insert_log(ids, message):
         print(e)
     finally:
         closecon(conn)
-
 
 
 def get_contact_name_from_id(id):
@@ -306,7 +297,6 @@ def update_contact_selected(ids):
         print(e)
     finally:
         closecon(conn)
-
 
 
 def load_log():
@@ -343,7 +333,46 @@ def clear_all_users():
 def updatetable(messageid, message):
     try:
         conn = create_connection()
-        sql = " UPDATE main.logs SET message='{0}' where id='{1}'".format(message,messageid)
+        sql = " UPDATE main.logs SET message='{0}' where id='{1}'".format(message, messageid)
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def clear_all_logs():
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM logs"
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def clear_all_contacts():
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM contacts"
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def clear_all_msgtemplates():
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM messagestemplates"
         cur = conn.cursor()
         cur.execute(sql)
         return cur.lastrowid

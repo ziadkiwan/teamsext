@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>737</width>
+    <width>801</width>
     <height>504</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@
  } </string>
          </property>
          <property name="title">
-          <string>User Informations</string>
+          <string>User Info</string>
          </property>
          <property name="flat">
           <bool>false</bool>
@@ -131,14 +131,20 @@ background-color : blue
            <widget class="QWidget" name="widget_7" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QPushButton" name="btn_bold">
+              <widget class="QToolButton" name="btn_bold">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="text">
                 <string>Bold</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_italic">
+              <widget class="QToolButton" name="btn_italic">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="text">
                 <string>Italic</string>
                </property>
@@ -147,14 +153,14 @@ background-color : blue
              <item>
               <widget class="QPushButton" name="btn_savetemplate">
                <property name="text">
-                <string>Save to Templates</string>
+                <string>Save</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="btn_templates">
                <property name="text">
-                <string>Messages Templates</string>
+                <string>Load</string>
                </property>
               </widget>
              </item>
@@ -193,8 +199,8 @@ background-color : blue
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>737</width>
-     <height>21</height>
+     <width>801</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMore">
@@ -202,6 +208,8 @@ background-color : blue
      <string>Tools</string>
     </property>
     <addaction name="actionSetup_Access_Token"/>
+    <addaction name="actionRemove_Account"/>
+    <addaction name="actionClear_Logs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -234,6 +242,16 @@ background-color : blue
   <action name="action_About">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionRemove_Account">
+   <property name="text">
+    <string>Remove Account</string>
+   </property>
+  </action>
+  <action name="actionClear_Logs">
+   <property name="text">
+    <string>Clear Logs</string>
    </property>
   </action>
  </widget>

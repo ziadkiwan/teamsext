@@ -1,3 +1,4 @@
+import os
 import shelve
 import urllib as urllib
 
@@ -90,6 +91,10 @@ class extendmain(maingui.Ui_MainWindow):
         self.btn_templates.clicked.connect(self.getmessagetemplate)
         self.btn_savetemplate.clicked.connect(self.savetemplate)
         self.btn_send.clicked.connect(self.send_msg)
+        self.actionClear_Logs.triggered.connect(self.clearlogs)
+        self.actionRemove_Account.triggered.connect(self.removeaccount)
+        self.btn_bold.setIcon(QtGui.QIcon('imgs/bold.png'))
+        self.btn_italic.setIcon(QtGui.QIcon('imgs/italic.png'))
         self.btn_bold.clicked.connect(self.boldselection)
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
@@ -111,6 +116,24 @@ class extendmain(maingui.Ui_MainWindow):
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+
+
+    def removeaccount(self):
+        os.remove("00000001.jpg")
+        db.clear_all_users()
+        db.clear_all_contacts()
+        db.clear_all_msgtemplates()
+        db.clear_all_logs()
+        global stored_accesstoken
+        stored_accesstoken = ""
+        reloadheaders()
+        self.load_log_table("success")
+        self.getlocalcontacts("success")
+        self.setupuserinfo()
+
+    def clearlogs(self):
+        db.clear_all_logs()
+        self.load_log_table("success")
 
     def send_msg(self):
         nbofrows = self.contacts_table.model().rowCount()
@@ -222,6 +245,9 @@ class extendmain(maingui.Ui_MainWindow):
             self.dname.setText("Display Name: " + result.displayname)
             self.dname.setMaximumHeight(20)
         else:
+            pixmap = QPixmap("imgs/empty.png")
+            pixmap = pixmap.scaled(200, 200)
+            self.avatar.setPixmap(pixmap)
             self.email.setText("No User")
             self.email.setMaximumHeight(20)
             self.nickname.setText("No User")
