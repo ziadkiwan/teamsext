@@ -380,3 +380,16 @@ def clear_all_msgtemplates():
         print(e)
     finally:
         closecon(conn)
+
+
+def delete_msg_template_by_id(msg_id):
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM messagestemplates where id='{0}'".format(msg_id)
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)

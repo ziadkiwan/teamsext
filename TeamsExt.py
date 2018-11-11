@@ -31,7 +31,7 @@ current_user = ""
 
 contact_table_Headers = ["Title", "Select", "Type"]
 log_table_headers = ["Contacts", "Date", "Message"]
-message_templates_table_header = ["Id", "Message", "Select"]
+message_templates_table_header = ["Id", "Message", "Select","Remove"]
 
 
 # class ContactsTableModel(QAbstractTableModel):
@@ -391,20 +391,27 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
         self.TemplateObj.show()
         self.loadmessages()
         # self.table_template.dataChanged.connect(self.updatetable)
-        self.model.dataChanged.connect(self.dataChanged)
-        # self.table_template.doubleClicked.connect(self.select_template)
-        self.table_template.setWordWrap(True)
-        self.table_template.resizeRowsToContents()
-        self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
+
         # self.buttonBox.accepted.connect(self.accept)
 
     def select_template(self):
         try:
-            button = self.qbutton.sender()
+            button = self.qbutton_select.sender()
             index = self.table_template.indexAt(button.pos())
             msg = self.model.data(self.model.index(index.row(), 1))
             self.mainui.txt_msg.setPlainText(msg)
             self.TemplateObj.close()
+        except Exception as e:
+            print(e)
+
+    def delete_msg_template(self):
+        try:
+            button = self.qbutton_remove.sender()
+            index = self.table_template.indexAt(button.pos())
+            msg_id = self.model.data(self.model.index(index.row(), 0))
+            db.delete_msg_template_by_id(msg_id)
+            # self.model.removeRow(index.row()) this caused the Qtoolrefrence to go so i had to make a work around which is reload the whole table
+            self.loadmessages()
         except Exception as e:
             print(e)
 
@@ -414,6 +421,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
         db.update_text(id, msg)
 
     def loadmessages(self):
+
         try:
             result = db.get_all_msg_templates()
             # print(result)
@@ -435,12 +443,17 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
                 row1.append(cell)
                 cell = QStandardItem()
                 row1.append(cell)
+                cell = QStandardItem()
+                row1.append(cell)
                 self.model.appendRow(row1)
-                self.qbutton = QtWidgets.QToolButton()
-                self.qbutton.setIcon(QtGui.QIcon("imgs/select.png"))
-                self.qbutton.clicked.connect(self.select_template)
-                self.table_template.setIndexWidget(self.model.index(idx, 2), self.qbutton)
-
+                self.qbutton_select = QtWidgets.QToolButton()
+                self.qbutton_select.setIcon(QtGui.QIcon("imgs/select.png"))
+                self.qbutton_select.clicked.connect(self.select_template)
+                self.table_template.setIndexWidget(self.model.index(idx, 2), self.qbutton_select)
+                self.qbutton_remove = QtWidgets.QToolButton()
+                self.qbutton_remove.setIcon(QtGui.QIcon("imgs/remove.png"))
+                self.qbutton_remove.clicked.connect(self.delete_msg_template)
+                self.table_template.setIndexWidget(self.model.index(idx, 3), self.qbutton_remove)
             # item = QtGui.QStandardItem("Click me")
             # item.setCheckable(True)
             # self.contacts_table.appendRow(item)
@@ -449,7 +462,12 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
                 header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
                 header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
                 header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
-
+                header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+            self.model.dataChanged.connect(self.dataChanged)
+            # self.table_template.doubleClicked.connect(self.select_template)
+            self.table_template.setWordWrap(True)
+            self.table_template.resizeRowsToContents()
+            self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
         except Exception as e:
             print(e)
 
