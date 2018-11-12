@@ -89,7 +89,7 @@ class extendmain(maingui.Ui_MainWindow):
         self.setupuserinfo()
         self.actionSetup_Access_Token.triggered.connect(self.getuserinfo)
         self.getlocalcontacts("success")
-        self.refreshcontact.clicked.connect(self.getteamscontacts)
+        self.btn_refresh_contact.clicked.connect(self.getteamscontacts)
         self.chck_groups.toggled.connect(self.getlocalcontacts)
         self.btn_templates.clicked.connect(self.getmessagetemplate)
         self.btn_savetemplate.clicked.connect(self.savetemplate)
@@ -98,13 +98,14 @@ class extendmain(maingui.Ui_MainWindow):
         self.actionRemove_Account.triggered.connect(self.removeaccount)
         self.btn_bold.setIcon(QtGui.QIcon('imgs/bold.png'))
         self.btn_italic.setIcon(QtGui.QIcon('imgs/italic.png'))
+        self.btn_refresh_contact.setIcon(QtGui.QIcon("imgs/refresh.png"))
         self.btn_bold.clicked.connect(self.boldselection)
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
         self.btn_save_contacts.clicked.connect(self.save_contacts)
         # self.action_About.triggered.connect(lambda: self.displaypopup('fooData'))
         self.action_About.triggered.connect(lambda: self.displaypopup("Thank you for using this tool, it was created "
-                                                                      "by Ziad Kiwan and Mark Khayat, as an individual contribution, and does not have"
+                                                                      "by Ziad Kiwan and Marc Khayat, as an individual contribution, and does not have"
                                                                       " any link to Cisco.\nif you have any problems or suggetions please contact me on my email: ziad_kiwan_1992@hotmail.com \nThank you! "))
         self.load_log_table("success")
         self.btn_load_contacts.clicked.connect(self.load_contacts_table)

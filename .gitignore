@@ -110,7 +110,6 @@ venv.bak/
 /00000001.jpg
 /data.db
 /build/
-/dist/
 /config.dat
 /config.bak
 /config.dir

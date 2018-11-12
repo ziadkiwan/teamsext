@@ -96,23 +96,41 @@ background-color : blue
      <widget class="QWidget" name="widget_3" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QWidget" name="widget_4" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="styleSheet">
+          <string notr="true">QGroupBox { 
+     border: 2px solid gray; 
+     border-radius: 3px; 
+ }</string>
+         </property>
+         <property name="title">
+          <string>Contacts</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <widget class="QWidget" name="widget_6" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QPushButton" name="btn_save_contacts">
-               <property name="text">
-                <string>Save</string>
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="title">
+                <string>Favorites</string>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_load_contacts">
-               <property name="text">
-                <string>Load</string>
-               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QPushButton" name="btn_load_contacts">
+                  <property name="text">
+                   <string>Load</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btn_save_contacts">
+                  <property name="text">
+                   <string>Save</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
@@ -123,9 +141,9 @@ background-color : blue
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="refreshcontact">
+              <widget class="QToolButton" name="btn_refresh_contact">
                <property name="text">
-                <string>Refresh Contacts</string>
+                <string>Re</string>
                </property>
               </widget>
              </item>
