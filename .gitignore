@@ -114,3 +114,4 @@ venv.bak/
 /config.dat
 /config.bak
 /config.dir
+/data.db-journal
