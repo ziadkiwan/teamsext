@@ -37,6 +37,12 @@ create_logs_sql = """CREATE TABLE `logs` (
 	PRIMARY KEY(`id`)
 );"""
 
+create_favorites_sql = """CREATE TABLE favorites
+(
+    name TEXT NOT NULL,
+    contact_id TEXT
+);"""
+
 
 def create_connection():
     """ create a database connection to the SQLite database
@@ -103,6 +109,8 @@ def create_tables():
         cur.execute(create_logs_sql)
         cur = conn.cursor()
         cur.execute(create_messsagestemplates_sql)
+        cur = conn.cursor()
+        cur.execute(create_favorites_sql)
 
     except Exception as e:
         print(e)
@@ -241,8 +249,7 @@ def insert_log(ids, message):
     # message = message.replace("\n", "<br>")
     contactsstr = ""
     idsstr = ""
-    i = 0
-    for id in ids:
+    for i, id in enumerate(ids):
         name = get_contact_name_from_id(id)
         if i == len(ids) - 1:
             contactsstr += name[0][0]
@@ -250,7 +257,6 @@ def insert_log(ids, message):
         else:
             contactsstr += name[0][0] + ", "
             idsstr += id + ", "
-        i += 1
     date = datetime.datetime.now()
     # print(contactsstr)
     # print(idsstr)
@@ -282,14 +288,14 @@ def get_contact_name_from_id(id):
         closecon(conn)
 
 
-def update_contact_selected(ids):
+def update_contact_selected(ids,):
     try:
         conn = create_connection()
         sql = " UPDATE contacts SET selected='no'"
         cur = conn.cursor()
         cur.execute(sql)
         for id in ids:
-            sql = " UPDATE contacts SET selected='yes' where id='{0}'".format(id)
+            sql = "UPDATE contacts SET selected='yes' where id='{0}'".format(id)
             cur = conn.cursor()
             cur.execute(sql)
         return cur.lastrowid
@@ -386,6 +392,81 @@ def delete_msg_template_by_id(msg_id):
     try:
         conn = create_connection()
         sql = " DELETE FROM messagestemplates where id='{0}'".format(msg_id)
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def delete_all_favorites():
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM favorites"
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.lastrowid
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def insert_favorite(recipients, text):
+    try:
+        conn = create_connection()
+        for i, recipent in enumerate(recipients):
+            sql = " INSERT INTO favorites(contact_id, name) VALUES('{0}','{1}') ".format(recipent, text)
+            cur = conn.cursor()
+            cur.execute(sql)
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def get_all_favorites():
+    try:
+        conn = create_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM favorites ORDER BY name ")
+        rows = cur.fetchall()
+        # all = []
+        # for row in rows:
+        #     current_user = ctct.contact(id=row[0], title=row[1], selected=row[2],
+        #                                 type=row[3])
+        #     all.append(current_user)
+        return rows
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def get_all_favorites_by_name(name):
+    try:
+        conn = create_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT contact_id FROM favorites WHERE name='{0}'".format(name))
+        rows = cur.fetchall()
+        # all = []
+        # for row in rows:
+        #     current_user = ctct.contact(id=row[0], title=row[1], selected=row[2],
+        #                                 type=row[3])
+        #     all.append(current_user)
+        return rows
+    except Exception as e:
+        print(e)
+    finally:
+        closecon(conn)
+
+
+def delete_favorite_by_id(name):
+    try:
+        conn = create_connection()
+        sql = " DELETE FROM favorites where name='{0}'".format(name)
         cur = conn.cursor()
         cur.execute(sql)
         return cur.lastrowid

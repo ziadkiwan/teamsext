@@ -4,7 +4,7 @@ import urllib as urllib
 
 from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QWidget
 from Loadingdialog import Ui_Dialog as loadingui
 import Messagestemplate as msg_template
 from aiohttp.web_response import json_response
@@ -31,7 +31,8 @@ current_user = ""
 
 contact_table_Headers = ["Title", "Select", "Type"]
 log_table_headers = ["Contacts", "Date", "Message"]
-message_templates_table_header = ["Id", "Message", "Select","Remove"]
+message_templates_table_header = ["Id", "Message", "Select", "Remove"]
+favorites_table_header = ["Name", "Contacts", "Select", "Remove"]
 
 
 # class ContactsTableModel(QAbstractTableModel):
@@ -77,6 +78,7 @@ message_templates_table_header = ["Id", "Message", "Select","Remove"]
 #             return True
 #         return False
 
+
 class extendmain(maingui.Ui_MainWindow):
     def __init__(self, windowObj):
         self.dialog = QtWidgets.QDialog()
@@ -99,11 +101,13 @@ class extendmain(maingui.Ui_MainWindow):
         self.btn_bold.clicked.connect(self.boldselection)
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
+        self.btn_save_contacts.clicked.connect(self.save_contacts)
         # self.action_About.triggered.connect(lambda: self.displaypopup('fooData'))
         self.action_About.triggered.connect(lambda: self.displaypopup("Thank you for using this tool, it was created "
-                                                                      "by me (Ziad Kiwan) as an individual contribution, and does not have"
+                                                                      "by Ziad Kiwan and Mark Khayat, as an individual contribution, and does not have"
                                                                       " any link to Cisco.\nif you have any problems or suggetions please contact me on my email: ziad_kiwan_1992@hotmail.com \nThank you! "))
         self.load_log_table("success")
+        self.btn_load_contacts.clicked.connect(self.load_contacts_table)
         retrieveauth()
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
@@ -117,19 +121,56 @@ class extendmain(maingui.Ui_MainWindow):
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+    def load_contacts_table(self):
+        Messagestemplatewindow = QtWidgets.QMainWindow()
+        MessagestemplateUI = Msg_templateclass(mainui=self, templateobj=Messagestemplatewindow, msg=False)
+        windows.append(MessagestemplateUI)
+
+    def save_contacts(self):
+        nbofrows = self.contacts_table.model().rowCount()
+        recipients = []
+        if (nbofrows == 0):
+            self.displaypopup("Contacts List is empty!")
+            return
+        for i in range(nbofrows):
+            # cell = QStandardItem(self.contacts_table.model().data(self.contacts_table.model().index(i, 1)))
+            try:
+                if self.contacts_table.model().item(i,
+                                                    1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
+                    i, 1).checkState() == QtCore.Qt.PartiallyChecked:
+                    contact_name_index = self.contacts_table.model().index(i, 0)
+                    contact_name = self.contacts_table.model().data(contact_name_index)
+                    contact_id = db.get_id_by_contact_name(contact_name)
+                    recipients.append(contact_id[0][0])
+            except Exception as e:
+                print(e)
+        if len(recipients) == 0:
+            self.displaypopup("No contacts were selected!")
+            return
+        text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt", "Input a name:", QLineEdit.Normal, "")
+        if okPressed and text != '':
+            db.insert_favorite(recipients, text)
+            self.displaypopup("Saved Successfully")
+
+    # Messagestemplatewindow = QtWidgets.QMainWindow()
+    #     MessagestemplateUI = Msg_templateclass(mainui=self, templateobj=Messagestemplatewindow)
+    #     windows.append(MessagestemplateUI)
 
     def removeaccount(self):
-        os.remove("00000001.jpg")
-        db.clear_all_users()
-        db.clear_all_contacts()
-        db.clear_all_msgtemplates()
-        db.clear_all_logs()
-        global stored_accesstoken
-        stored_accesstoken = ""
-        reloadheaders()
-        self.load_log_table("success")
-        self.getlocalcontacts("success")
-        self.setupuserinfo()
+        try:
+            if (os._exists("00000001.jpg")):
+                os.remove("00000001.jpg")
+            db.clear_all_users()
+            db.clear_all_contacts()
+            db.clear_all_msgtemplates()
+            db.clear_all_logs()
+            db.delete_all_favorites()
+            storeauth("removed")
+            self.load_log_table("success")
+            self.getlocalcontacts("success")
+            self.setupuserinfo()
+        except Exception as e:
+            print(e)
 
     def clearlogs(self):
         db.clear_all_logs()
@@ -222,7 +263,7 @@ class extendmain(maingui.Ui_MainWindow):
 
     def getmessagetemplate(self):
         Messagestemplatewindow = QtWidgets.QMainWindow()
-        MessagestemplateUI = Msg_templateclass(mainui=self, templateobj=Messagestemplatewindow)
+        MessagestemplateUI = Msg_templateclass(mainui=self, templateobj=Messagestemplatewindow, msg=True)
         windows.append(MessagestemplateUI)
 
     def getuserinfo(self):
@@ -304,7 +345,7 @@ class extendmain(maingui.Ui_MainWindow):
             self.contacts_table.setModel(self.model)
             for value in result:
                 row = []
-                for i,item in enumerate(value):
+                for i, item in enumerate(value):
                     if i == 1:
                         cell = QStandardItem()
                         cell.setCheckable(True)
@@ -385,12 +426,17 @@ def reloadheaders():
 
 
 class Msg_templateclass(msg_template.Ui_MainWindow):
-    def __init__(self, mainui, templateobj):
+    def __init__(self, mainui, templateobj, msg):
         self.mainui = mainui
         self.TemplateObj = templateobj
         self.setupUi(self.TemplateObj)
         self.TemplateObj.show()
-        self.loadmessages()
+        self.msg = msg
+        if (self.msg):
+            self.loadmessages()
+        else:
+            self.TemplateObj.setWindowTitle("Favorites")
+            self.loadfavorites()
         # self.table_template.dataChanged.connect(self.updatetable)
 
         # self.buttonBox.accepted.connect(self.accept)
@@ -401,6 +447,21 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             index = self.table_template.indexAt(button.pos())
             msg = self.model.data(self.model.index(index.row(), 1))
             self.mainui.txt_msg.setPlainText(msg)
+            self.TemplateObj.close()
+        except Exception as e:
+            print(e)
+
+    def select_favorite(self):
+        try:
+            button = self.qbutton_select.sender()
+            index = self.table_template.indexAt(button.pos())
+            name = self.model.data(self.model.index(index.row(), 0))
+            ids = db.get_all_favorites_by_name(name)
+            ids_clean = []
+            for id in ids:
+                ids_clean.append(id[0])
+            db.update_contact_selected(ids_clean)
+            self.mainui.getlocalcontacts("Success")
             self.TemplateObj.close()
         except Exception as e:
             print(e)
@@ -420,6 +481,17 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
         msg = self.model.data(index)
         id = self.model.data(self.model.index(index.row(), 0))
         db.update_text(id, msg)
+
+    def delete_favorite(self):
+        try:
+            button = self.qbutton_remove.sender()
+            index = self.table_template.indexAt(button.pos())
+            name = self.model.data(self.model.index(index.row(), 0))
+            db.delete_favorite_by_id(name)
+            # self.model.removeRow(index.row()) this caused the Qtoolrefrence to go so i had to make a work around which is reload the whole table
+            self.loadfavorites()
+        except Exception as e:
+            print(e)
 
     def loadmessages(self):
 
@@ -471,6 +543,81 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
         except Exception as e:
             print(e)
+
+    def loadfavorites(self):
+        all_favorites = db.get_all_favorites()
+        contacts_list = []
+        contacts_names = []
+
+        for i in range(len(all_favorites)):
+            # contacts_name.append(db.get_contact_name_from_id())
+            if i != 0 and all_favorites[i - 1][0] != all_favorites[i][0]:
+                contacts_list.append(contacts_names)
+                contacts_names = []
+                contact_temp = [db.get_contact_name_from_id(all_favorites[i][1])[0][0], all_favorites[i][0]]
+                contacts_names.append(contact_temp)
+            else:
+                contact_temp = [db.get_contact_name_from_id(all_favorites[i][1])[0][0], all_favorites[i][0]]
+                contacts_names.append(contact_temp)
+
+            if i == len(all_favorites) - 1:
+                contacts_list.append(contacts_names)
+        self.model = QStandardItemModel(self.table_template)
+        # self.contacts_table.itemChanged.connect(self.itemChanged)
+        self.table_template.setModel(self.model)
+        last_contact = []
+        for contacts in contacts_list:
+            contacts_str = ""
+            for idx, contact in enumerate(contacts):
+                if (len(contacts)) == 0:
+                    contacts_str += contact[0]
+                elif (len(contacts)) -1 == idx:
+                    contacts_str += contact[0]
+                else:
+                    contacts_str += contact[0]+", "
+
+            contacts_temp = [contacts[0][1], contacts_str]
+            last_contact.append(contacts_temp)
+        for idx, value in enumerate(last_contact):
+            row1 = []
+            # print(value)
+            # for i,item in enumerate(value):
+            #     cell = QStandardItem(str(item))
+            #     if i == 0:
+            #         cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            #     row1.append(cell)
+            cell = QStandardItem(str(value[0]))
+            cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            row1.append(cell)
+            cell = QStandardItem(str(value[1]))
+            cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            row1.append(cell)
+            cell = QStandardItem()
+            row1.append(cell)
+            cell = QStandardItem()
+            row1.append(cell)
+            self.model.appendRow(row1)
+            self.qbutton_select = QtWidgets.QToolButton()
+            self.qbutton_select.setIcon(QtGui.QIcon("imgs/select.png"))
+            self.qbutton_select.clicked.connect(self.select_favorite)
+            self.table_template.setIndexWidget(self.model.index(idx, 2), self.qbutton_select)
+            self.qbutton_remove = QtWidgets.QToolButton()
+            self.qbutton_remove.setIcon(QtGui.QIcon("imgs/remove.png"))
+            self.qbutton_remove.clicked.connect(self.delete_favorite)
+            self.table_template.setIndexWidget(self.model.index(idx, 3), self.qbutton_remove)
+        # item = QtGui.QStandardItem("Click me")
+        # item.setCheckable(True)
+        # self.contacts_table.appendRow(item)
+        header = self.table_template.horizontalHeader()
+        if self.table_template.model().rowCount() != 0:
+            header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        # self.table_template.doubleClicked.connect(self.select_template)
+        self.table_template.setWordWrap(True)
+        self.table_template.resizeRowsToContents()
+        self.table_template.model().setHorizontalHeaderLabels(favorites_table_header)
 
 
 class Authdialog(adiag.Ui_Dialog):

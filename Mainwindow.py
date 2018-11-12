@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\mainwindow.ui'
+# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -87,6 +87,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setContentsMargins(11, 11, 11, 11)
         self.horizontalLayout_2.setSpacing(6)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.btn_save_contacts = QtWidgets.QPushButton(self.widget_6)
+        self.btn_save_contacts.setObjectName("btn_save_contacts")
+        self.horizontalLayout_2.addWidget(self.btn_save_contacts)
+        self.btn_load_contacts = QtWidgets.QPushButton(self.widget_6)
+        self.btn_load_contacts.setObjectName("btn_load_contacts")
+        self.horizontalLayout_2.addWidget(self.btn_load_contacts)
         self.chck_groups = QtWidgets.QCheckBox(self.widget_6)
         self.chck_groups.setObjectName("chck_groups")
         self.horizontalLayout_2.addWidget(self.chck_groups)
@@ -145,7 +151,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.widget_8)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 26))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuMore = QtWidgets.QMenu(self.menuBar)
         self.menuMore.setObjectName("menuMore")
@@ -179,13 +185,15 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "TeamsExt"))
         self.userinfo.setTitle(_translate("MainWindow", "User Info"))
+        self.btn_save_contacts.setText(_translate("MainWindow", "Save"))
+        self.btn_load_contacts.setText(_translate("MainWindow", "Load"))
         self.chck_groups.setText(_translate("MainWindow", "Display All"))
         self.refreshcontact.setText(_translate("MainWindow", "Refresh Contacts"))
         self.btn_bold.setText(_translate("MainWindow", "Bold"))
         self.btn_italic.setText(_translate("MainWindow", "Italic"))
         self.btn_savetemplate.setText(_translate("MainWindow", "Save"))
         self.btn_templates.setText(_translate("MainWindow", "Load"))
-        self.btn_send.setText(_translate("MainWindow", "send"))
+        self.btn_send.setText(_translate("MainWindow", "Send"))
         self.menuMore.setTitle(_translate("MainWindow", "Tools"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.actionSetup_Access_Token.setText(_translate("MainWindow", "Setup Access Token"))
