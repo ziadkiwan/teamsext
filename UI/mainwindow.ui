@@ -102,6 +102,20 @@ background-color : blue
            <widget class="QWidget" name="widget_6" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
+              <widget class="QPushButton" name="btn_save_contacts">
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_load_contacts">
+               <property name="text">
+                <string>Load</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QCheckBox" name="chck_groups">
                <property name="text">
                 <string>Display All</string>
@@ -185,7 +199,7 @@ background-color : blue
        <item>
         <widget class="QPushButton" name="btn_send">
          <property name="text">
-          <string>send</string>
+          <string>Send</string>
          </property>
         </widget>
        </item>
@@ -200,7 +214,7 @@ background-color : blue
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMore">
