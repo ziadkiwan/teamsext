@@ -760,21 +760,30 @@ class loadcontacts(QtCore.QThread):
 
     def run(self):
         try:
-            resp = requests.get("https://api.ciscospark.com/v1/rooms", headers=headers, verify=False)
-            json_response = resp.json()
+            resp = requests.get("https://api.ciscospark.com/v1/rooms?type=direct", headers=headers, verify=False)
+            all_response = resp.json()
+            resp = requests.get("https://api.ciscospark.com/v1/rooms?type=group", headers=headers, verify=False)
+            group_response = resp.json()
         except Exception as e:
             print(e)
         # print(json_response['errors'])
-        if 'errors' in json_response:
+        if 'errors' in all_response or 'errors' in group_response:
             error_message = json_response.get("errors")[0].get('description')
             # print(error_message)
             self.sig_error.emit(error_message)
         else:
             # print(json_response)
-            for contact in json_response['items']:
+            for contact in all_response['items']:
                 contact_import = ctct.contact(id=contact['id'], title=contact['title'], selected="no",
                                               type=contact['type'])
                 db.insert_contact(contact_import)
+
+            for contact in group_response['items']:
+                contact_import = ctct.contact(id=contact['id'], title=contact['title'], selected="no",
+                                              type=contact['type'])
+                db.insert_contact(contact_import)
+
+
             self.sig_success.emit("success")
 
         # print(last_id)
