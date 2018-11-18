@@ -8,4 +8,4 @@ REQUESTS
 
 
 To Package app:
-pyinstaller.exe .\TeamsExt.py --hidden-import=aiohttp --windowed
+pyinstaller TeamsExt.py --hidden-import=aiohttp --windowed
