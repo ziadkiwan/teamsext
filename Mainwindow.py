@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
+# Form implementation generated from reading ui file '.\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -168,6 +168,8 @@ class Ui_MainWindow(object):
         self.menuMore.setObjectName("menuMore")
         self.menuHelp = QtWidgets.QMenu(self.menuBar)
         self.menuHelp.setObjectName("menuHelp")
+        self.menuAccount = QtWidgets.QMenu(self.menuBar)
+        self.menuAccount.setObjectName("menuAccount")
         MainWindow.setMenuBar(self.menuBar)
         self.statusBar = QtWidgets.QStatusBar(MainWindow)
         self.statusBar.setObjectName("statusBar")
@@ -182,11 +184,18 @@ class Ui_MainWindow(object):
         self.actionRemove_Account.setObjectName("actionRemove_Account")
         self.actionClear_Logs = QtWidgets.QAction(MainWindow)
         self.actionClear_Logs.setObjectName("actionClear_Logs")
+        self.actionExport = QtWidgets.QAction(MainWindow)
+        self.actionExport.setObjectName("actionExport")
+        self.actionImport = QtWidgets.QAction(MainWindow)
+        self.actionImport.setObjectName("actionImport")
         self.menuMore.addAction(self.actionSetup_Access_Token)
-        self.menuMore.addAction(self.actionRemove_Account)
         self.menuMore.addAction(self.actionClear_Logs)
         self.menuHelp.addAction(self.action_About)
+        self.menuAccount.addAction(self.actionRemove_Account)
+        self.menuAccount.addAction(self.actionExport)
+        self.menuAccount.addAction(self.actionImport)
         self.menuBar.addAction(self.menuMore.menuAction())
+        self.menuBar.addAction(self.menuAccount.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -209,9 +218,12 @@ class Ui_MainWindow(object):
         self.btn_send.setText(_translate("MainWindow", "Send"))
         self.menuMore.setTitle(_translate("MainWindow", "Tools"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
+        self.menuAccount.setTitle(_translate("MainWindow", "Account"))
         self.actionSetup_Access_Token.setText(_translate("MainWindow", "Setup Access Token"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.action_About.setText(_translate("MainWindow", "About"))
-        self.actionRemove_Account.setText(_translate("MainWindow", "Remove Account"))
+        self.actionRemove_Account.setText(_translate("MainWindow", "Remove"))
         self.actionClear_Logs.setText(_translate("MainWindow", "Clear Logs"))
+        self.actionExport.setText(_translate("MainWindow", "Export"))
+        self.actionImport.setText(_translate("MainWindow", "Import"))
 

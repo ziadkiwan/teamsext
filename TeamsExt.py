@@ -1,6 +1,7 @@
 import os
 import shelve
 import urllib as urllib
+import zipfile
 
 from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
@@ -110,6 +111,8 @@ class extendmain(maingui.Ui_MainWindow):
         self.load_log_table("success")
         self.btn_load_contacts.clicked.connect(self.load_contacts_table)
         retrieveauth()
+        self.actionExport.triggered.connect(self.export_account)
+        self.actionImport.triggered.connect(self.import_account)
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
         # self.browsefile.clicked.connect(self.showfiledialog)
@@ -122,6 +125,64 @@ class extendmain(maingui.Ui_MainWindow):
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+
+
+    def import_account(self):
+        try:
+            currentpath = os.getcwd()
+            name = QtWidgets.QFileDialog.getOpenFileName(self.windowObj, 'Import Account')
+            archive = zipfile.ZipFile(name[0], 'r')
+            text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+                                                   "Please input the archive password, if you did not put a password press cancel",
+                                                   QLineEdit.Normal, "")
+            if okPressed and text != '':
+                archive.extractall(path=currentpath,pwd=str.encode(text))
+            else:
+                archive.extractall(path=currentpath)
+            self.setupuserinfo()
+            self.load_log_table("success")
+            self.getlocalcontacts("success")
+            retrieveauth()
+
+        except zipfile.BadZipFile as ziperror:
+            self.displaypopup(ziperror)
+        except Exception as ex:
+            self.displaypopup("Unexpected Error:" +str(ex))
+
+
+    def export_account(self):
+        try:
+            name = QtWidgets.QFileDialog.getSaveFileName(self.windowObj, 'Save Account')
+            zf = zipfile.ZipFile(name[0], "w")
+            currentpath = os.getcwd()
+            message = ""
+
+            if not os.path.exists("data.db") and not os.path.exists("00000001.jpg"):
+                message = "Data was not backed up, "
+            else:
+                zf.write("data.db")
+                zf.write("00000001.jpg")
+                message = "Data was backed up, "
+            if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists("config.dir"):
+                message += "Access Token was not backed up"
+            else:
+                zf.write("config.bak")
+                zf.write("config.dat")
+                zf.write("config.dir")
+                message += "Access Token was backed up"
+
+            text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+                                                   "For Better Security input a password, press cancel to backup without password",
+                                                   QLineEdit.Normal, "")
+
+            if okPressed and text != '':
+                message += ", Password was set: " + text
+                zf.setpassword(str.encode(text))
+            zf.close()
+            self.displaypopup(message)
+        except Exception as e:
+            print(e)
+
     def load_contacts_table(self):
         Messagestemplatewindow = QtWidgets.QMainWindow()
         MessagestemplateUI = Msg_templateclass(mainui=self, templateobj=Messagestemplatewindow, msg=False)
@@ -572,10 +633,10 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             for idx, contact in enumerate(contacts):
                 if (len(contacts)) == 0:
                     contacts_str += contact[0]
-                elif (len(contacts)) -1 == idx:
+                elif (len(contacts)) - 1 == idx:
                     contacts_str += contact[0]
                 else:
-                    contacts_str += contact[0]+", "
+                    contacts_str += contact[0] + ", "
 
             contacts_temp = [contacts[0][1], contacts_str]
             last_contact.append(contacts_temp)
@@ -782,7 +843,6 @@ class loadcontacts(QtCore.QThread):
                 contact_import = ctct.contact(id=contact['id'], title=contact['title'], selected="no",
                                               type=contact['type'])
                 db.insert_contact(contact_import)
-
 
             self.sig_success.emit("success")
 

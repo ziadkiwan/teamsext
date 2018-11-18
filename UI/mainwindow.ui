@@ -240,7 +240,6 @@ background-color : blue
      <string>Tools</string>
     </property>
     <addaction name="actionSetup_Access_Token"/>
-    <addaction name="actionRemove_Account"/>
     <addaction name="actionClear_Logs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -249,7 +248,16 @@ background-color : blue
     </property>
     <addaction name="action_About"/>
    </widget>
+   <widget class="QMenu" name="menuAccount">
+    <property name="title">
+     <string>Account</string>
+    </property>
+    <addaction name="actionRemove_Account"/>
+    <addaction name="actionExport"/>
+    <addaction name="actionImport"/>
+   </widget>
    <addaction name="menuMore"/>
+   <addaction name="menuAccount"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -270,12 +278,22 @@ background-color : blue
   </action>
   <action name="actionRemove_Account">
    <property name="text">
-    <string>Remove Account</string>
+    <string>Remove</string>
    </property>
   </action>
   <action name="actionClear_Logs">
    <property name="text">
     <string>Clear Logs</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import</string>
    </property>
   </action>
  </widget>
