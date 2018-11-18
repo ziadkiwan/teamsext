@@ -99,15 +99,20 @@ class extendmain(maingui.Ui_MainWindow):
         self.actionRemove_Account.triggered.connect(self.removeaccount)
         self.btn_bold.setIcon(QtGui.QIcon('imgs/bold.png'))
         self.btn_italic.setIcon(QtGui.QIcon('imgs/italic.png'))
+        self.btn_send.setIcon(QtGui.QIcon('imgs/send.png'))
+        self.btn_savetemplate.setIcon(QtGui.QIcon('imgs/save.png'))
+        self.btn_templates.setIcon(QtGui.QIcon('imgs/load.png'))
+        self.btn_save_contacts.setIcon(QtGui.QIcon('imgs/save.png'))
+        self.btn_load_contacts.setIcon(QtGui.QIcon('imgs/load.png'))
         self.btn_refresh_contact.setIcon(QtGui.QIcon("imgs/refresh.png"))
         self.btn_bold.clicked.connect(self.boldselection)
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
         self.btn_save_contacts.clicked.connect(self.save_contacts)
         # self.action_About.triggered.connect(lambda: self.displaypopup('fooData'))
-        self.action_About.triggered.connect(lambda: self.displaypopup("Thank you for using this tool, it was created "
-                                                                      "by Ziad Kiwan and Marc Khayat, as an individual contribution, and does not have"
-                                                                      " any link to Cisco.\nif you have any problems or suggetions please contact me on my email: ziad_kiwan_1992@hotmail.com \nThank you! "))
+        self.action_About.triggered.connect(lambda: self.displaypopup("""Thank you for using TeamsExt, created by Ziad Kiwan and Marc Khayat. This tool is provided "as is" and is neither supported nor backed by Cisco.
+Source code and latest release can be found at https://github.com/ziadkiwan/teamsext/
+For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.load_log_table("success")
         self.btn_load_contacts.clicked.connect(self.load_contacts_table)
         retrieveauth()
@@ -125,7 +130,6 @@ class extendmain(maingui.Ui_MainWindow):
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
-
 
     def import_account(self):
         try:
@@ -150,11 +154,10 @@ class extendmain(maingui.Ui_MainWindow):
             print(ex)
             # self.displaypopup("Unexpected Error:" +ex))
 
-
     def export_account(self):
         try:
             name = QtWidgets.QFileDialog.getSaveFileName(self.windowObj, 'Save Account')
-            zf = zipfile.ZipFile(name[0]+".bak", "w")
+            zf = zipfile.ZipFile(name[0] + ".bak", "w")
             currentpath = os.getcwd()
             message = ""
 
@@ -164,7 +167,8 @@ class extendmain(maingui.Ui_MainWindow):
                 zf.write("data.db")
                 zf.write("00000001.jpg")
                 message = "Data was backed up, "
-            if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists("config.dir"):
+            if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists(
+                    "config.dir"):
                 message += "Access Token was not backed up"
             else:
                 zf.write("config.bak")
@@ -221,7 +225,8 @@ class extendmain(maingui.Ui_MainWindow):
 
     def removeaccount(self):
         try:
-            buttonReply = QMessageBox.question(self.windowObj, 'TeamsExt', "Are you sure you want to remove your account??",
+            buttonReply = QMessageBox.question(self.windowObj, 'TeamsExt',
+                                               "Are you sure you want to remove your account?",
                                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if buttonReply == QMessageBox.Yes:
                 if (os._exists("00000001.jpg")):
