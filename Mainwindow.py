@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\mainwindow.ui'
+# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -146,6 +146,9 @@ class Ui_MainWindow(object):
         self.txt_msg.setObjectName("txt_msg")
         self.verticalLayout_5.addWidget(self.txt_msg)
         self.verticalLayout_3.addWidget(self.widget_5)
+        self.btn_send = QtWidgets.QPushButton(self.widget_3)
+        self.btn_send.setObjectName("btn_send")
+        self.verticalLayout_3.addWidget(self.btn_send)
         self.horizontalLayout.addWidget(self.widget_3)
         self.widget_8 = QtWidgets.QWidget(self.centralWidget)
         self.widget_8.setObjectName("widget_8")
@@ -156,9 +159,6 @@ class Ui_MainWindow(object):
         self.table_log = QtWidgets.QTableView(self.widget_8)
         self.table_log.setObjectName("table_log")
         self.verticalLayout_6.addWidget(self.table_log)
-        self.btn_send = QtWidgets.QPushButton(self.widget_8)
-        self.btn_send.setObjectName("btn_send")
-        self.verticalLayout_6.addWidget(self.btn_send)
         self.horizontalLayout.addWidget(self.widget_8)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)

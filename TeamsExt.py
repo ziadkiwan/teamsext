@@ -132,13 +132,13 @@ class extendmain(maingui.Ui_MainWindow):
             currentpath = os.getcwd()
             name = QtWidgets.QFileDialog.getOpenFileName(self.windowObj, 'Import Account')
             archive = zipfile.ZipFile(name[0], 'r')
-            text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
-                                                   "Please input the archive password, if you did not put a password press cancel",
-                                                   QLineEdit.Normal, "")
-            if okPressed and text != '':
-                archive.extractall(path=currentpath,pwd=str.encode(text))
-            else:
-                archive.extractall(path=currentpath)
+            # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+            #                                        "Please input the archive password, if you did not put a password press cancel",
+            #                                        QLineEdit.Normal, "")
+            # if okPressed and text != '':
+            #     archive.extractall(path=currentpath,pwd=text.encode)
+            # else:
+            archive.extractall(path=currentpath)
             self.setupuserinfo()
             self.load_log_table("success")
             self.getlocalcontacts("success")
@@ -147,13 +147,14 @@ class extendmain(maingui.Ui_MainWindow):
         except zipfile.BadZipFile as ziperror:
             self.displaypopup(ziperror)
         except Exception as ex:
-            self.displaypopup("Unexpected Error:" +str(ex))
+            print(ex)
+            # self.displaypopup("Unexpected Error:" +ex))
 
 
     def export_account(self):
         try:
             name = QtWidgets.QFileDialog.getSaveFileName(self.windowObj, 'Save Account')
-            zf = zipfile.ZipFile(name[0], "w")
+            zf = zipfile.ZipFile(name[0]+".bak", "w")
             currentpath = os.getcwd()
             message = ""
 
@@ -171,13 +172,13 @@ class extendmain(maingui.Ui_MainWindow):
                 zf.write("config.dir")
                 message += "Access Token was backed up"
 
-            text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
-                                                   "For Better Security input a password, press cancel to backup without password",
-                                                   QLineEdit.Normal, "")
-
-            if okPressed and text != '':
-                message += ", Password was set: " + text
-                zf.setpassword(str.encode(text))
+            # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+            #                                        "For Better Security input a password, press cancel to backup without password",
+            #                                        QLineEdit.Normal, "")
+            #
+            # if okPressed and text != '':
+            #     message += ", Password was set: " + text
+            #     zf.setpassword(text.encode())
             zf.close()
             self.displaypopup(message)
         except Exception as e:
@@ -220,17 +221,20 @@ class extendmain(maingui.Ui_MainWindow):
 
     def removeaccount(self):
         try:
-            if (os._exists("00000001.jpg")):
-                os.remove("00000001.jpg")
-            db.clear_all_users()
-            db.clear_all_contacts()
-            db.clear_all_msgtemplates()
-            db.clear_all_logs()
-            db.delete_all_favorites()
-            storeauth("removed")
-            self.load_log_table("success")
-            self.getlocalcontacts("success")
-            self.setupuserinfo()
+            buttonReply = QMessageBox.question(self.windowObj, 'TeamsExt', "Are you sure you want to remove your account??",
+                                               QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if buttonReply == QMessageBox.Yes:
+                if (os._exists("00000001.jpg")):
+                    os.remove("00000001.jpg")
+                db.clear_all_users()
+                db.clear_all_contacts()
+                db.clear_all_msgtemplates()
+                db.clear_all_logs()
+                db.delete_all_favorites()
+                storeauth("removed")
+                self.load_log_table("success")
+                self.getlocalcontacts("success")
+                self.setupuserinfo()
         except Exception as e:
             print(e)
 

@@ -205,6 +205,13 @@ background-color : blue
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="btn_send">
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -213,13 +220,6 @@ background-color : blue
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QTableView" name="table_log"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_send">
-         <property name="text">
-          <string>Send</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
