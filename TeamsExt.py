@@ -427,6 +427,7 @@ class extendmain(maingui.Ui_MainWindow):
             # item.setCheckable(True)
             # self.contacts_table.appendRow(item)
             self.contacts_table.model().setHorizontalHeaderLabels(contact_table_Headers)
+            self.contacts_table.setSortingEnabled(True)
             # self.contacts_table.setFocusPolicy(QtCore.Qt.NoFocus)
             header = self.contacts_table.horizontalHeader()
             header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
