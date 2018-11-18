@@ -135,56 +135,57 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         try:
             currentpath = os.getcwd()
             name = QtWidgets.QFileDialog.getOpenFileName(self.windowObj, 'Import Account')
-            archive = zipfile.ZipFile(name[0], 'r')
-            # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
-            #                                        "Please input the archive password, if you did not put a password press cancel",
-            #                                        QLineEdit.Normal, "")
-            # if okPressed and text != '':
-            #     archive.extractall(path=currentpath,pwd=text.encode)
-            # else:
-            archive.extractall(path=currentpath)
-            self.setupuserinfo()
-            self.load_log_table("success")
-            self.getlocalcontacts("success")
-            retrieveauth()
-
+            if name[0] != '':
+                archive = zipfile.ZipFile(name[0], 'r')
+                # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+                #                                        "Please input the archive password, if you did not put a password press cancel",
+                #                                        QLineEdit.Normal, "")
+                # if okPressed and text != '':
+                #     archive.extractall(path=currentpath,pwd=text.encode)
+                # else:
+                archive.extractall(path=currentpath)
+                self.setupuserinfo()
+                self.load_log_table("success")
+                self.getlocalcontacts("success")
+                retrieveauth()
         except zipfile.BadZipFile as ziperror:
-            self.displaypopup(ziperror)
+                self.displaypopup(str(ziperror))
         except Exception as ex:
-            print(ex)
-            # self.displaypopup("Unexpected Error:" +ex))
+                print(ex)
+                # self.displaypopup("Unexpected Error:" +ex))
 
     def export_account(self):
         try:
             name = QtWidgets.QFileDialog.getSaveFileName(self.windowObj, 'Save Account')
-            zf = zipfile.ZipFile(name[0] + ".bak", "w")
-            currentpath = os.getcwd()
-            message = ""
+            if name[0] != '':
+                zf = zipfile.ZipFile(name[0] + ".bak", "w")
+                currentpath = os.getcwd()
+                message = ""
 
-            if not os.path.exists("data.db") and not os.path.exists("00000001.jpg"):
-                message = "Data was not backed up, "
-            else:
-                zf.write("data.db")
-                zf.write("00000001.jpg")
-                message = "Data was backed up, "
-            if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists(
-                    "config.dir"):
-                message += "Access Token was not backed up"
-            else:
-                zf.write("config.bak")
-                zf.write("config.dat")
-                zf.write("config.dir")
-                message += "Access Token was backed up"
+                if not os.path.exists("data.db") and not os.path.exists("00000001.jpg"):
+                    message = "Data was not backed up, "
+                else:
+                    zf.write("data.db")
+                    zf.write("00000001.jpg")
+                    message = "Data was backed up, "
+                if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists(
+                        "config.dir"):
+                    message += "Access Token was not backed up"
+                else:
+                    zf.write("config.bak")
+                    zf.write("config.dat")
+                    zf.write("config.dir")
+                    message += "Access Token was backed up"
 
-            # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
-            #                                        "For Better Security input a password, press cancel to backup without password",
-            #                                        QLineEdit.Normal, "")
-            #
-            # if okPressed and text != '':
-            #     message += ", Password was set: " + text
-            #     zf.setpassword(text.encode())
-            zf.close()
-            self.displaypopup(message)
+                # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
+                #                                        "For Better Security input a password, press cancel to backup without password",
+                #                                        QLineEdit.Normal, "")
+                #
+                # if okPressed and text != '':
+                #     message += ", Password was set: " + text
+                #     zf.setpassword(text.encode())
+                zf.close()
+                self.displaypopup(message)
         except Exception as e:
             print(e)
 
