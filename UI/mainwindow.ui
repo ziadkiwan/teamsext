@@ -247,6 +247,7 @@ background-color : blue
      <string>Help</string>
     </property>
     <addaction name="action_About"/>
+    <addaction name="actionVersion"/>
    </widget>
    <widget class="QMenu" name="menuAccount">
     <property name="title">
@@ -294,6 +295,11 @@ background-color : blue
   <action name="actionImport">
    <property name="text">
     <string>Import</string>
+   </property>
+  </action>
+  <action name="actionVersion">
+   <property name="text">
+    <string>Version</string>
    </property>
   </action>
  </widget>

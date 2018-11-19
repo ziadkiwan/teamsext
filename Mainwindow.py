@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
+# Form implementation generated from reading ui file '.\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -188,9 +188,12 @@ class Ui_MainWindow(object):
         self.actionExport.setObjectName("actionExport")
         self.actionImport = QtWidgets.QAction(MainWindow)
         self.actionImport.setObjectName("actionImport")
+        self.actionVersion = QtWidgets.QAction(MainWindow)
+        self.actionVersion.setObjectName("actionVersion")
         self.menuMore.addAction(self.actionSetup_Access_Token)
         self.menuMore.addAction(self.actionClear_Logs)
         self.menuHelp.addAction(self.action_About)
+        self.menuHelp.addAction(self.actionVersion)
         self.menuAccount.addAction(self.actionRemove_Account)
         self.menuAccount.addAction(self.actionExport)
         self.menuAccount.addAction(self.actionImport)
@@ -226,4 +229,5 @@ class Ui_MainWindow(object):
         self.actionClear_Logs.setText(_translate("MainWindow", "Clear Logs"))
         self.actionExport.setText(_translate("MainWindow", "Export"))
         self.actionImport.setText(_translate("MainWindow", "Import"))
+        self.actionVersion.setText(_translate("MainWindow", "Version"))
 

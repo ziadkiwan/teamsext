@@ -21,6 +21,8 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
+version = "0.3.1"
+
 stored_accesstoken = ""
 
 headers = {"Authorization": "Bearer " + stored_accesstoken,
@@ -118,6 +120,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         retrieveauth()
         self.actionExport.triggered.connect(self.export_account)
         self.actionImport.triggered.connect(self.import_account)
+        self.actionVersion.setText("Version: "+version)
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
         # self.browsefile.clicked.connect(self.showfiledialog)
@@ -160,22 +163,22 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             if name[0] != '':
                 zf = zipfile.ZipFile(name[0] + ".bak", "w")
                 currentpath = os.getcwd()
-                message = ""
+                backup = True
 
                 if not os.path.exists("data.db") and not os.path.exists("00000001.jpg"):
-                    message = "Data was not backed up, "
+                    backup = False
                 else:
                     zf.write("data.db")
                     zf.write("00000001.jpg")
-                    message = "Data was backed up, "
                 if not os.path.exists("config.bak") and not os.path.exists("config.dat") and not os.path.exists(
                         "config.dir"):
-                    message += "Access Token was not backed up"
+                    backup = False
                 else:
                     zf.write("config.bak")
                     zf.write("config.dat")
                     zf.write("config.dir")
-                    message += "Access Token was backed up"
+
+
 
                 # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
                 #                                        "For Better Security input a password, press cancel to backup without password",
@@ -185,6 +188,11 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                 #     message += ", Password was set: " + text
                 #     zf.setpassword(text.encode())
                 zf.close()
+
+                if backup:
+                    message = "Backup Completed"
+                else:
+                    message = "Partial backup done."
                 self.displaypopup(message)
         except Exception as e:
             print(e)
