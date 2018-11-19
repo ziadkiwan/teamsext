@@ -21,7 +21,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.3.1"
+version = "0.3.2"
 
 stored_accesstoken = ""
 
@@ -431,6 +431,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                         cell.setCheckable(True)
                         cell.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                         cell.setData(QVariant(Qt.Checked), Qt.CheckStateRole)
+                        cell.emitDataChanged()
                         if "no" in item:
                             cell.setCheckState(False)
                         else:
@@ -451,9 +452,11 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
             header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
             header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+            header.sectionClicked.connect(self.sorttable)
             # self.contacts_table.doubleClicked.connect(self.updateselect)
         except Exception as e:
             print(e)
+
 
     # def updateselect(self, mi):
     #     try:
@@ -470,6 +473,24 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #
     #     except Exception as e:
     #         print(e)
+
+    def sorttable(self,index):
+        if index == 1 :
+            nbofrows = self.contacts_table.model().rowCount()
+            recipients = []
+            if (nbofrows == 0):
+                return
+            for i in range(nbofrows):
+                # cell = QStandardItem(self.contacts_table.model().data(self.contacts_table.model().index(i, 1)))
+                try:
+                    if self.contacts_table.model().item(i,
+                                                        1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
+                        i, 1).checkState() == QtCore.Qt.PartiallyChecked:
+                        contact_name_index = self.contacts_table.model().index(i, 0)
+                        rowItems = self.contacts_table.model().takeRow(contact_name_index.row())
+                        self.contacts_table.model().insertRow(0, rowItems)
+                except Exception as e:
+                    print(e)
 
     def open_Loading_dialog(self):
         self.dialog.ui = loadingui()
