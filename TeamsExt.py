@@ -21,7 +21,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.3.2"
+version = "0.3.3"
 
 stored_accesstoken = ""
 
@@ -400,16 +400,20 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.open_Loading_dialog()
 
     def displaypopup(self, message):
-        self.close_Loading_dialog()
-        infoBox = QMessageBox()
-        infoBox.setWindowTitle("TeamsExt")
-        # infoBox.setIcon(QMessageBox.Warning)
-        # infoBox.setText("Error")
-        infoBox.setInformativeText(message)
-        infoBox.setStandardButtons(QMessageBox.Ok)
-        infoBox.setEscapeButton(QMessageBox.Close)
-        infoBox.exec_()
-        windows.append(infoBox)
+        try:
+            self.close_Loading_dialog()
+            infoBox = QMessageBox()
+            infoBox.setWindowTitle("TeamsExt")
+            # infoBox.setIcon(QMessageBox.Warning)
+            # infoBox.setText("Error")
+            infoBox.setInformativeText(message)
+            infoBox.setStandardButtons(QMessageBox.Ok)
+            infoBox.setEscapeButton(QMessageBox.Close)
+            infoBox.exec_()
+            windows.append(infoBox)
+        except Exception as e:
+            print(e)
+
 
     def getlocalcontacts(self, message):
         self.close_Loading_dialog()
@@ -869,11 +873,12 @@ class loadcontacts(QtCore.QThread):
             print(e)
         # print(json_response['errors'])
         if 'errors' in all_response or 'errors' in group_response:
-            error_message = json_response.get("errors")[0].get('description')
+            error_message = all_response.get("errors")[0].get('description')
             # print(error_message)
             self.sig_error.emit(error_message)
         else:
             # print(json_response)
+            db.clear_all_contacts()
             for contact in all_response['items']:
                 contact_import = ctct.contact(id=contact['id'], title=contact['title'], selected="no",
                                               type=contact['type'])
