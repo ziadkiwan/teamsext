@@ -245,34 +245,52 @@ def get_id_by_contact_name(contact_name):
     #     all.append(current_user)
 
 
-def insert_log(ids, message):
+def insert_log(ids, message, not_fav = True):
     # message = message.replace("\n", "<br>")
-    contactsstr = ""
-    idsstr = ""
-    for i, id in enumerate(ids):
-        name = get_contact_name_from_id(id)
-        if i == len(ids) - 1:
-            contactsstr += name[0][0]
-            idsstr += id
-        else:
-            contactsstr += name[0][0] + ", "
-            idsstr += id + ", "
-    date = datetime.datetime.now()
-    # print(contactsstr)
-    # print(idsstr)
-    try:
-        conn = create_connection()
-        sql = " INSERT INTO logs(display,sent_time,ids,message) VALUES('{0}','{1}','{2}','{3}') ".format(contactsstr,
-                                                                                                         date, idsstr,
-                                                                                                         message)
-        cur = conn.cursor()
-        cur.execute(sql)
-        return cur.lastrowid
-    except Exception as e:
-        print(e)
-    finally:
-        closecon(conn)
+    if not_fav:
+        contactsstr = ""
+        idsstr = ""
+        for i, id in enumerate(ids):
+            name = get_contact_name_from_id(id)
+            if i == len(ids) - 1:
+                contactsstr += name[0][0]
+                idsstr += id
+            else:
+                contactsstr += name[0][0] + ", "
+                idsstr += id + ", "
+        date = datetime.datetime.now()
+        # print(contactsstr)
+        # print(idsstr)
+        try:
+            conn = create_connection()
+            sql = " INSERT INTO logs(display,sent_time,ids,message) VALUES('{0}','{1}','{2}','{3}') ".format(contactsstr,
+                                                                                                             date, idsstr,
+                                                                                                             message)
+            cur = conn.cursor()
+            cur.execute(sql)
+            return cur.lastrowid
 
+        except Exception as e:
+            print(e)
+        finally:
+            closecon(conn)
+    else:
+        try:
+            date = datetime.datetime.now()
+            conn = create_connection()
+            sql = " INSERT INTO logs(display,sent_time,ids,message) VALUES('{0}','{1}','{2}','{3}') ".format(
+                ids,
+                date, "fav",
+                message)
+            print(sql)
+            cur = conn.cursor()
+            cur.execute(sql)
+            return cur.lastrowid
+
+        except Exception as e:
+            print(e)
+        finally:
+            closecon(conn)
 
 def get_contact_name_from_id(id):
     try:

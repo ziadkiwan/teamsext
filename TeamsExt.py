@@ -2,6 +2,8 @@ import os
 import shelve
 import urllib as urllib
 import zipfile
+from datetime import time, datetime
+from itertools import islice
 
 from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
@@ -21,7 +23,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.3.3"
+version = "0.3.4"
 
 stored_accesstoken = ""
 
@@ -84,6 +86,7 @@ favorites_table_header = ["Name", "Contacts", "Select", "Remove"]
 
 class extendmain(maingui.Ui_MainWindow):
     def __init__(self, windowObj):
+        self.selected_fav = ""
         self.dialog = QtWidgets.QDialog()
         self.windowObj = windowObj
         self.setupUi(self.windowObj)
@@ -281,12 +284,20 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         if len(recipients) == 0:
             self.displaypopup("No contacts were selected!")
             return
-        messageid = db.insert_log(recipients, "Sending.....")
+        print(self.selected_fav)
+        if self.selected_fav != "":
+            messageid = db.insert_log(self.selected_fav, "Sending.....",False)
+        else:
+          messageid = db.insert_log(recipients, "Sending.....")
         self.load_log_table("success")
         self.work = sendmessages(ids=recipients, message=message, messageid=messageid)
         self.work.sig_error.connect(self.load_log_table)
         self.work.sig_success.connect(self.load_log_table)
         self.work.start()
+
+    def nth_index(self,iterable, value, n):
+        matches = (idx for idx, val in enumerate(iterable) if val == value)
+        return next(islice(matches, n - 1, n), None)
 
     def load_log_table(self, message):
         result = db.load_log()
@@ -295,10 +306,31 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.table_log.setModel(self.model)
         for value in result:
             row = []
-            for item in value:
-                cell = QStandardItem(item)
-                cell.setFlags(QtCore.Qt.ItemIsEnabled)
-                row.append(cell)
+            # for item in value:
+            #     cell = QStandardItem(item)
+            #     cell.setToolTip(item)
+            #     cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            #     row.append(cell)
+            cell = QStandardItem(value[0])
+            cell.setToolTip(value[0])
+            cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            row.append(cell)
+            datetime_object = datetime.strptime(value[1], "%Y-%m-%d %H:%M:%S.%f")
+            cell = QStandardItem(datetime_object.strftime("%Y-%m-%d %H:%M"))
+            cell.setToolTip(value[1])
+            cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            row.append(cell)
+            newline_count = value[2].count("\n")
+            if newline_count >=2:
+                idx = self.nth_index(value[2], '\n', 2)
+                cell = QStandardItem(value[2][:idx]+"...")
+            elif len(value[2]) >= 120:
+                cell = QStandardItem(value[2][:119]+"...")
+            else:
+                cell = QStandardItem(value[2])
+            cell.setToolTip(value[2])
+            cell.setFlags(QtCore.Qt.ItemIsEnabled)
+            row.append(cell)
             self.model.appendRow(row)
         # item = QtGui.QStandardItem("Click me")
         # item.setCheckable(True)
@@ -309,7 +341,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         self.table_log.resizeRowsToContents()
-        # self.contacts_table.doubleClicked.connect(self.updateselect)
+
 
     def boldselection(self):
         try:
@@ -435,7 +467,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                         cell.setCheckable(True)
                         cell.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                         cell.setData(QVariant(Qt.Checked), Qt.CheckStateRole)
-                        cell.emitDataChanged()
                         if "no" in item:
                             cell.setCheckState(False)
                         else:
@@ -457,12 +488,14 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
             header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
             header.sectionClicked.connect(self.sorttable)
+            self.contacts_table.model().dataChanged.connect(self.contacts_table_changed)
+
             # self.contacts_table.doubleClicked.connect(self.updateselect)
         except Exception as e:
             print(e)
 
-
-    # def updateselect(self, mi):
+    def contacts_table_changed(self, tLeft, bRight):
+        self.selected_fav = ""
     #     try:
     #         row = mi.row()
     #         column = mi.column()
@@ -567,6 +600,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             for id in ids:
                 ids_clean.append(id[0])
             db.update_contact_selected(ids_clean)
+            self.mainui.selected_fav = name;
             self.mainui.getlocalcontacts("Success")
             self.TemplateObj.close()
         except Exception as e:
