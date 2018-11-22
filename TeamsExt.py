@@ -114,6 +114,7 @@ class extendmain(maingui.Ui_MainWindow):
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
         self.btn_save_contacts.clicked.connect(self.save_contacts)
+        self.btn_send.setDisabled(True)
         # self.action_About.triggered.connect(lambda: self.displaypopup('fooData'))
         self.action_About.triggered.connect(lambda: self.displaypopup("""Thank you for using TeamsExt, created by Ziad Kiwan and Marc Khayat. This tool is provided "as is" and is neither supported nor backed by Cisco.
 Source code and latest release can be found at https://github.com/ziadkiwan/teamsext/
@@ -123,7 +124,8 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         retrieveauth()
         self.actionExport.triggered.connect(self.export_account)
         self.actionImport.triggered.connect(self.import_account)
-        self.actionVersion.setText("Version: "+version)
+        self.actionVersion.setText("Version: " + version)
+        self.txt_msg.textChanged.connect(self.txt_msg_txt_chnaged)
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
         # self.browsefile.clicked.connect(self.showfiledialog)
@@ -136,6 +138,30 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+
+    def txt_msg_txt_chnaged(self):
+        nbofrows = self.contacts_table.model().rowCount()
+        nbofreceipt = 0;
+        if (nbofrows == 0):
+            self.btn_send.setDisabled(True)
+            return
+        for i in range(nbofrows):
+            # cell = QStandardItem(self.contacts_table.model().data(self.contacts_table.model().index(i, 1)))
+            try:
+                if self.contacts_table.model().item(i,
+                                                    1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
+                    i, 1).checkState() == QtCore.Qt.PartiallyChecked:
+                    nbofreceipt +=1
+            except Exception as e:
+                print(e)
+        if nbofreceipt == 0:
+            self.btn_send.setDisabled(True)
+            return
+        if self.txt_msg.toPlainText() == "":
+            self.btn_send.setDisabled(True)
+        else:
+            self.btn_send.setDisabled(False)
+
 
     def import_account(self):
         try:
@@ -155,10 +181,10 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                 self.getlocalcontacts("success")
                 retrieveauth()
         except zipfile.BadZipFile as ziperror:
-                self.displaypopup(str(ziperror))
+            self.displaypopup(str(ziperror))
         except Exception as ex:
-                print(ex)
-                # self.displaypopup("Unexpected Error:" +ex))
+            print(ex)
+            # self.displaypopup("Unexpected Error:" +ex))
 
     def export_account(self):
         try:
@@ -180,8 +206,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                     zf.write("config.bak")
                     zf.write("config.dat")
                     zf.write("config.dir")
-
-
 
                 # text, okPressed = QInputDialog.getText(self.windowObj, "TeamExt",
                 #                                        "For Better Security input a password, press cancel to backup without password",
@@ -286,16 +310,16 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             return
         print(self.selected_fav)
         if self.selected_fav != "":
-            messageid = db.insert_log(self.selected_fav, "Sending.....",False)
+            messageid = db.insert_log(self.selected_fav, "Sending.....", False)
         else:
-          messageid = db.insert_log(recipients, "Sending.....")
+            messageid = db.insert_log(recipients, "Sending.....")
         self.load_log_table("success")
         self.work = sendmessages(ids=recipients, message=message, messageid=messageid)
         self.work.sig_error.connect(self.load_log_table)
         self.work.sig_success.connect(self.load_log_table)
         self.work.start()
 
-    def nth_index(self,iterable, value, n):
+    def nth_index(self, iterable, value, n):
         matches = (idx for idx, val in enumerate(iterable) if val == value)
         return next(islice(matches, n - 1, n), None)
 
@@ -321,11 +345,11 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             cell.setFlags(QtCore.Qt.ItemIsEnabled)
             row.append(cell)
             newline_count = value[2].count("\n")
-            if newline_count >=2:
+            if newline_count >= 2:
                 idx = self.nth_index(value[2], '\n', 2)
-                cell = QStandardItem(value[2][:idx]+"...")
+                cell = QStandardItem(value[2][:idx] + "...")
             elif len(value[2]) >= 120:
-                cell = QStandardItem(value[2][:119]+"...")
+                cell = QStandardItem(value[2][:119] + "...")
             else:
                 cell = QStandardItem(value[2])
             cell.setToolTip(value[2])
@@ -341,7 +365,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         self.table_log.resizeRowsToContents()
-
 
     def boldselection(self):
         try:
@@ -446,7 +469,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         except Exception as e:
             print(e)
 
-
     def getlocalcontacts(self, message):
         self.close_Loading_dialog()
         if self.chck_groups.isChecked():
@@ -495,24 +517,42 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             print(e)
 
     def contacts_table_changed(self, tLeft, bRight):
-        self.selected_fav = ""
-    #     try:
-    #         row = mi.row()
-    #         column = mi.column()
-    #         model = self.contacts_table.model()
-    #         index = model.index(row, 1)
-    #         selected = model.data(index)
-    #         if "no" in selected:
-    #            model.setData(index, "yes")
-    #          #    self.contacts_table.item(row, 1).setText("Yes")
-    #         else:
-    #             model.setData(index, "no")
-    #
-    #     except Exception as e:
-    #         print(e)
+        nbofrows = self.contacts_table.model().rowCount()
+        nbofreceipt = 0;
+        if (nbofrows == 0):
+            self.btn_send.setDisabled(True)
+            return
+        for i in range(nbofrows):
+            # cell = QStandardItem(self.contacts_table.model().data(self.contacts_table.model().index(i, 1)))
+            try:
+                if self.contacts_table.model().item(i,
+                                                    1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
+                    i, 1).checkState() == QtCore.Qt.PartiallyChecked:
+                    nbofreceipt += 1
+            except Exception as e:
+                print(e)
+        if nbofreceipt == 0:
+            self.btn_send.setDisabled(True)
+            return
+        if self.txt_msg.toPlainText() != "":
+            self.btn_send.setDisabled(False)
+        #     try:
+        #         row = mi.row()
+        #         column = mi.column()
+        #         model = self.contacts_table.model()
+        #         index = model.index(row, 1)
+        #         selected = model.data(index)
+        #         if "no" in selected:
+        #            model.setData(index, "yes")
+        #          #    self.contacts_table.item(row, 1).setText("Yes")
+        #         else:
+        #             model.setData(index, "no")
+        #
+        #     except Exception as e:
+        #         print(e)
 
-    def sorttable(self,index):
-        if index == 1 :
+    def sorttable(self, index):
+        if index == 1:
             nbofrows = self.contacts_table.model().rowCount()
             recipients = []
             if (nbofrows == 0):
@@ -681,7 +721,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             self.table_template.setWordWrap(True)
             self.table_template.resizeRowsToContents()
             self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
-            self.table_template.setColumnHidden(0,True)
+            self.table_template.setColumnHidden(0, True)
         except Exception as e:
             print(e)
 
