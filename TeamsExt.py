@@ -681,6 +681,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             self.table_template.setWordWrap(True)
             self.table_template.resizeRowsToContents()
             self.table_template.model().setHorizontalHeaderLabels(message_templates_table_header)
+            self.table_template.setColumnHidden(0,True)
         except Exception as e:
             print(e)
 
