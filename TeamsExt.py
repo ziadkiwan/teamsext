@@ -23,7 +23,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.3.4"
+version = "0.3.5"
 
 stored_accesstoken = ""
 
@@ -518,7 +518,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
 
     def contacts_table_changed(self, tLeft, bRight):
         nbofrows = self.contacts_table.model().rowCount()
-        nbofreceipt = 0;
+        nbofreceipt = 0
         if (nbofrows == 0):
             self.btn_send.setDisabled(True)
             return
