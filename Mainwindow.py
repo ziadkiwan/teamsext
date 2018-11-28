@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\mainwindow.ui'
+# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -110,6 +110,9 @@ class Ui_MainWindow(object):
         self.btn_refresh_contact = QtWidgets.QToolButton(self.widget_6)
         self.btn_refresh_contact.setObjectName("btn_refresh_contact")
         self.horizontalLayout_2.addWidget(self.btn_refresh_contact)
+        self.btn_add_group = QtWidgets.QToolButton(self.widget_6)
+        self.btn_add_group.setObjectName("btn_add_group")
+        self.horizontalLayout_2.addWidget(self.btn_add_group)
         self.verticalLayout_7.addWidget(self.widget_6)
         self.contacts_table = QtWidgets.QTableView(self.groupBox)
         self.contacts_table.setObjectName("contacts_table")
@@ -162,7 +165,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.widget_8)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 26))
         self.menuBar.setObjectName("menuBar")
         self.menuMore = QtWidgets.QMenu(self.menuBar)
         self.menuMore.setObjectName("menuMore")
@@ -214,6 +217,7 @@ class Ui_MainWindow(object):
         self.btn_load_contacts.setText(_translate("MainWindow", "Load"))
         self.chck_groups.setText(_translate("MainWindow", "Display All"))
         self.btn_refresh_contact.setText(_translate("MainWindow", "Re"))
+        self.btn_add_group.setText(_translate("MainWindow", "add"))
         self.btn_bold.setText(_translate("MainWindow", "Bold"))
         self.btn_italic.setText(_translate("MainWindow", "Italic"))
         self.btn_savetemplate.setText(_translate("MainWindow", "Save"))

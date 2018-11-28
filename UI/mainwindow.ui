@@ -147,6 +147,13 @@ background-color : blue
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QToolButton" name="btn_add_group">
+               <property name="text">
+                <string>add</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -232,7 +239,7 @@ background-color : blue
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMore">

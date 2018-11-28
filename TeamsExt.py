@@ -23,7 +23,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.3.5"
+version = "0.4"
 
 stored_accesstoken = ""
 
@@ -110,6 +110,7 @@ class extendmain(maingui.Ui_MainWindow):
         self.btn_save_contacts.setIcon(QtGui.QIcon('imgs/save.png'))
         self.btn_load_contacts.setIcon(QtGui.QIcon('imgs/load.png'))
         self.btn_refresh_contact.setIcon(QtGui.QIcon("imgs/refresh.png"))
+        self.btn_add_group.setIcon(QtGui.QIcon("imgs/add_to_group.png"))
         self.btn_bold.clicked.connect(self.boldselection)
         self.btn_italic.clicked.connect(self.italicselection)
         self.txt_msg.setPlaceholderText("Enter Your Message")
@@ -126,6 +127,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.actionImport.triggered.connect(self.import_account)
         self.actionVersion.setText("Version: " + version)
         self.txt_msg.textChanged.connect(self.txt_msg_txt_chnaged)
+        self.btn_add_group.clicked.connect(self.add_to_group)
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
         # self.browsefile.clicked.connect(self.showfiledialog)
@@ -138,6 +140,35 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+
+
+    def add_to_group(self):
+        nbofrows = self.contacts_table.model().rowCount()
+        recipients = []
+        if (nbofrows == 0):
+            self.displaypopup("Contacts List is empty!")
+            return
+        for i in range(nbofrows):
+            # cell = QStandardItem(self.contacts_table.model().data(self.contacts_table.model().index(i, 1)))
+            try:
+                if self.contacts_table.model().item(i,
+                                                    1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
+                    i, 1).checkState() == QtCore.Qt.PartiallyChecked:
+                    contact_name_index = self.contacts_table.model().index(i, 0)
+                    contact_type_index = self.contacts_table.model().index(i, 2)
+                    contact_type = self.contacts_table.model().data(contact_type_index)
+                    if contact_type == "group":
+                        contact_name = self.contacts_table.model().data(contact_name_index)
+                        contact_id = db.get_id_by_contact_name(contact_name)
+                        recipients.append([contact_id[0][0],contact_name])
+            except Exception as e:
+                print(e)
+        if len(recipients) == 0:
+            self.displaypopup("No groups were selected!")
+            return
+        Add_to_group_window = QtWidgets.QDialog()
+        Add_to_group_UI = Authdialog(mainui=self, dialogobj=Add_to_group_window,is_auth=False, recept=recipients)
+        windows.append(Add_to_group_UI)
 
     def txt_msg_txt_chnaged(self):
         nbofrows = self.contacts_table.model().rowCount()
@@ -804,12 +835,35 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
 
 class Authdialog(adiag.Ui_Dialog):
 
-    def __init__(self, mainui, dialogobj):
+    def __init__(self, mainui, dialogobj, is_auth = True, recept = None):
         self.mainui = mainui
         self.DialogObj = dialogobj
+        self.is_auth = is_auth
+        self.recept = recept
         self.setupUi(self.DialogObj)
         self.DialogObj.show()
-        self.buttonBox.accepted.connect(self.accept)
+        if not is_auth:
+            self.label.setText("Enter Email Addresses, Each Email on a line:")
+            self.buttonBox.accepted.connect(self.accept_mails)
+            self.DialogObj.setWindowTitle("Add To Group")
+
+        else:
+            self.DialogObj.setWindowTitle("Authentication")
+            self.buttonBox.accepted.connect(self.accept)
+
+    def accept_mails(self):
+        emails = self.txt_access.toPlainText()
+        if str(emails) != "":
+            self.work = add_to_groups(emails=emails,rooms=self.recept)
+            self.work.sig_error.connect(self.add_result)
+            self.work.sig_success.connect(self.add_result)
+            self.work.start()
+            self.mainui.open_Loading_dialog()
+
+    def add_result(self,message):
+        self.mainui.close_Loading_dialog()
+        if message != "success":
+            self.popup_message(message)
 
     def accept(self):
         accesstoken = self.txt_access.toPlainText()
@@ -890,6 +944,8 @@ class getuserdetail(QtCore.QThread):
         # gentable(self)
 
 
+
+
 class sendmessages(QtCore.QThread):
     sig_error = pyqtSignal(str)
     sig_success = pyqtSignal(str)
@@ -927,6 +983,55 @@ class sendmessages(QtCore.QThread):
 
     # self.completed.emit("hello")
     # gentable(self)
+
+
+class add_to_groups(QtCore.QThread):
+    sig_error = pyqtSignal(str)
+    sig_success = pyqtSignal(str)
+
+    def __init__(self, *args, **kwargs):
+        QThread.__init__(self)
+        # self.signal = QtCore.SIGNAL("signal")
+        self.Init(*args,**kwargs)
+
+    def Init(self, emails, rooms):
+        self.emails = emails
+        self.rooms = rooms
+
+    def run(self):
+        message = "success"
+        error_found = False
+        error_message = ""
+        try:
+            self.emails = self.emails.split("\n")
+            for roomDetails in self.rooms:
+                for email in self.emails:
+                    body_json = {
+                        "roomId": roomDetails[0],
+                        "personEmail": email,
+                    }
+                    print(email)
+                    resp = requests.post("https://api.ciscospark.com/v1/memberships",
+                                     json.dumps(body_json), headers=headers, verify=False)
+                    json_resp = resp.json()
+                    if 'errors' in json_resp:
+                        error_found  = True
+                        error_message += json_resp.get("errors")[0].get('description')+" Room: "+roomDetails[1]+" ("+email+")"+"\n"
+                        # print(error_message)
+                        # self.sig_error.emit(error_message)
+
+        except Exception as e:
+            print(e)
+        # print(json_response['errors'])
+        if error_found:
+            message = "Finished Successfully, but there were some errors!\n"
+            message += error_message
+        self.sig_success.emit(message)
+
+        # print(last_id)
+
+        # self.completed.emit("hello")
+        # gentable(self)
 
 
 class loadcontacts(QtCore.QThread):
