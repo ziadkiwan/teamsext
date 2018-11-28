@@ -642,6 +642,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
             db.update_contact_selected(ids_clean)
             self.mainui.selected_fav = name;
             self.mainui.getlocalcontacts("Success")
+            self.mainui.sorttable(1)
             self.TemplateObj.close()
         except Exception as e:
             print(e)
