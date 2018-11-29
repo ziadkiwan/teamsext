@@ -141,7 +141,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
 
-
     def add_to_group(self):
         nbofrows = self.contacts_table.model().rowCount()
         recipients = []
@@ -160,14 +159,14 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                     if contact_type == "group":
                         contact_name = self.contacts_table.model().data(contact_name_index)
                         contact_id = db.get_id_by_contact_name(contact_name)
-                        recipients.append([contact_id[0][0],contact_name])
+                        recipients.append([contact_id[0][0], contact_name])
             except Exception as e:
                 print(e)
         if len(recipients) == 0:
             self.displaypopup("No groups were selected!")
             return
         Add_to_group_window = QtWidgets.QDialog()
-        Add_to_group_UI = Authdialog(mainui=self, dialogobj=Add_to_group_window,is_auth=False, recept=recipients)
+        Add_to_group_UI = Authdialog(mainui=self, dialogobj=Add_to_group_window, is_auth=False, recept=recipients)
         windows.append(Add_to_group_UI)
 
     def txt_msg_txt_chnaged(self):
@@ -182,7 +181,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
                 if self.contacts_table.model().item(i,
                                                     1).checkState() == QtCore.Qt.Checked or self.contacts_table.model().item(
                     i, 1).checkState() == QtCore.Qt.PartiallyChecked:
-                    nbofreceipt +=1
+                    nbofreceipt += 1
             except Exception as e:
                 print(e)
         if nbofreceipt == 0:
@@ -192,7 +191,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             self.btn_send.setDisabled(True)
         else:
             self.btn_send.setDisabled(False)
-
 
     def import_account(self):
         try:
@@ -835,7 +833,7 @@ class Msg_templateclass(msg_template.Ui_MainWindow):
 
 class Authdialog(adiag.Ui_Dialog):
 
-    def __init__(self, mainui, dialogobj, is_auth = True, recept = None):
+    def __init__(self, mainui, dialogobj, is_auth=True, recept=None):
         self.mainui = mainui
         self.DialogObj = dialogobj
         self.is_auth = is_auth
@@ -843,7 +841,7 @@ class Authdialog(adiag.Ui_Dialog):
         self.setupUi(self.DialogObj)
         self.DialogObj.show()
         if not is_auth:
-            self.label.setText("Enter Email Addresses, Each Email on a line:")
+            self.label.setText("Enter email addresses, one per line:")
             self.buttonBox.accepted.connect(self.accept_mails)
             self.DialogObj.setWindowTitle("Add To Group")
 
@@ -854,16 +852,17 @@ class Authdialog(adiag.Ui_Dialog):
     def accept_mails(self):
         emails = self.txt_access.toPlainText()
         if str(emails) != "":
-            self.work = add_to_groups(emails=emails,rooms=self.recept)
-            self.work.sig_error.connect(self.add_result)
-            self.work.sig_success.connect(self.add_result)
+            self.work = add_to_groups(emails=emails, rooms=self.recept)
+            # self.work.sig_error_add.connect(self.add_result)
+            self.work.sig_success_add.connect(self.add_result)
             self.work.start()
             self.mainui.open_Loading_dialog()
 
-    def add_result(self,message):
+    def add_result(self, message):
         self.mainui.close_Loading_dialog()
         if message != "success":
-            self.popup_message(message)
+            self.mainui.displaypopup(message)
+            # self.popup_message(message)
 
     def accept(self):
         accesstoken = self.txt_access.toPlainText()
@@ -944,8 +943,6 @@ class getuserdetail(QtCore.QThread):
         # gentable(self)
 
 
-
-
 class sendmessages(QtCore.QThread):
     sig_error = pyqtSignal(str)
     sig_success = pyqtSignal(str)
@@ -986,13 +983,13 @@ class sendmessages(QtCore.QThread):
 
 
 class add_to_groups(QtCore.QThread):
-    sig_error = pyqtSignal(str)
-    sig_success = pyqtSignal(str)
+    # sig_error_add = pyqtSignal(str)
+    sig_success_add = pyqtSignal(str)
 
     def __init__(self, *args, **kwargs):
         QThread.__init__(self)
         # self.signal = QtCore.SIGNAL("signal")
-        self.Init(*args,**kwargs)
+        self.Init(*args, **kwargs)
 
     def Init(self, emails, rooms):
         self.emails = emails
@@ -1012,11 +1009,12 @@ class add_to_groups(QtCore.QThread):
                     }
                     print(email)
                     resp = requests.post("https://api.ciscospark.com/v1/memberships",
-                                     json.dumps(body_json), headers=headers, verify=False)
+                                         json.dumps(body_json), headers=headers, verify=False)
                     json_resp = resp.json()
                     if 'errors' in json_resp:
-                        error_found  = True
-                        error_message += json_resp.get("errors")[0].get('description')+" Room: "+roomDetails[1]+" ("+email+")"+"\n"
+                        error_found = True
+                        error_message += json_resp.get("errors")[0].get('description') + " Room: " + roomDetails[
+                            1] + " (" + email + ")" + "\n"
                         # print(error_message)
                         # self.sig_error.emit(error_message)
 
@@ -1026,7 +1024,7 @@ class add_to_groups(QtCore.QThread):
         if error_found:
             message = "Finished Successfully, but there were some errors!\n"
             message += error_message
-        self.sig_success.emit(message)
+        self.sig_success_add.emit(message)
 
         # print(last_id)
 
