@@ -1003,23 +1003,23 @@ class add_to_groups(QtCore.QThread):
             self.emails = self.emails.split("\n")
             for roomDetails in self.rooms:
                 for email in self.emails:
-                    body_json = {
-                        "roomId": roomDetails[0],
-                        "personEmail": email,
-                    }
-                    print(email)
-                    resp = requests.post("https://api.ciscospark.com/v1/memberships",
-                                         json.dumps(body_json), headers=headers, verify=False)
-                    json_resp = resp.json()
-                    if 'errors' in json_resp:
-                        error_found = True
-                        error_message += json_resp.get("errors")[0].get('description') + " Room: " + roomDetails[
-                            1] + " (" + email + ")" + "\n"
-                        # print(error_message)
-                        # self.sig_error.emit(error_message)
+                    if email != "":
+                        body_json = {
+                            "roomId": roomDetails[0],
+                            "personEmail": email,
+                        }
+                        resp = requests.post("https://api.ciscospark.com/v1/memberships",
+                                             json.dumps(body_json), headers=headers, verify=False)
+                        json_resp = resp.json()
+                        if 'errors' in json_resp:
+                            error_found = True
+                            error_message += json_resp.get("errors")[0].get('description') + " Room: " + roomDetails[
+                                1] + " (" + email + ")" + "\n"
+                            # print(error_message)
+                            # self.sig_error.emit(error_message)
 
         except Exception as e:
-            print(e)
+            self.sig_success_add.emit(e)
         # print(json_response['errors'])
         if error_found:
             message = "Finished Successfully, but there were some errors!\n"
