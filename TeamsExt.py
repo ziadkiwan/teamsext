@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QWidget
 
 from Loadingdialog import Ui_Dialog as loadingui
 import Messagestemplate as msg_template
-from aiohttp.web_response import json_response
 
 import Mainwindow as maingui
 import AuthDialog as adiag
@@ -96,6 +95,7 @@ class extendmain(maingui.Ui_MainWindow):
         self.setupuserinfo()
         self.actionSetup_Access_Token.triggered.connect(self.getuserinfo)
         self.getlocalcontacts("success")
+        self.sorttable(1)
         self.btn_refresh_contact.clicked.connect(self.getteamscontacts)
         self.chck_groups.toggled.connect(self.getlocalcontacts)
         self.btn_templates.clicked.connect(self.getmessagetemplate)
