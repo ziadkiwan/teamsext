@@ -8,7 +8,6 @@ from itertools import islice
 from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QWidget
-from Tools.scripts.mailerdaemon import emparse_list
 
 from Loadingdialog import Ui_Dialog as loadingui
 import Messagestemplate as msg_template
@@ -863,7 +862,7 @@ class Authdialog(adiag.Ui_Dialog):
     def add_result(self, message, failed_nb):
         self.mainui.close_Loading_dialog()
         emails = self.emails.split("\n")
-        success_nb = failed_nb-(len(emails)*len(self.recept))
+        success_nb = (len(emails)*len(self.recept))-failed_nb
         log_message = str(success_nb)+"/"+str(len(emails)*len(self.recept))+" Users were added"
         # for idx,space in enumerate(self.recept):
         #     if idx == len(self.recept)-1:
