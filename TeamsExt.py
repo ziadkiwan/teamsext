@@ -23,7 +23,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.4"
+version = "0.4.1"
 
 stored_accesstoken = ""
 
@@ -1006,7 +1006,7 @@ class add_to_groups(QtCore.QThread):
                     if email != "":
                         body_json = {
                             "roomId": roomDetails[0],
-                            "personEmail": email,
+                            "personEmail": email.strip(),
                         }
                         resp = requests.post("https://api.ciscospark.com/v1/memberships",
                                              json.dumps(body_json), headers=headers, verify=False)
@@ -1014,7 +1014,7 @@ class add_to_groups(QtCore.QThread):
                         if 'errors' in json_resp:
                             error_found = True
                             error_message += json_resp.get("errors")[0].get('description') + " Room: " + roomDetails[
-                                1] + " (" + email + ")" + "\n"
+                                1] + " (" + email.strip() + ")" + "\n"
                             # print(error_message)
                             # self.sig_error.emit(error_message)
 
