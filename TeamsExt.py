@@ -8,6 +8,8 @@ from itertools import islice
 from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QWidget
+from Tools.scripts.mailerdaemon import emparse_list
+
 from Loadingdialog import Ui_Dialog as loadingui
 import Messagestemplate as msg_template
 from aiohttp.web_response import json_response
@@ -850,16 +852,27 @@ class Authdialog(adiag.Ui_Dialog):
             self.buttonBox.accepted.connect(self.accept)
 
     def accept_mails(self):
-        emails = self.txt_access.toPlainText()
-        if str(emails) != "":
-            self.work = add_to_groups(emails=emails, rooms=self.recept)
+        self.emails = self.txt_access.toPlainText()
+        if str(self.emails) != "":
+            self.work = add_to_groups(emails=self.emails, rooms=self.recept)
             # self.work.sig_error_add.connect(self.add_result)
             self.work.sig_success_add.connect(self.add_result)
             self.work.start()
             self.mainui.open_Loading_dialog()
 
-    def add_result(self, message):
+    def add_result(self, message, failed_nb):
         self.mainui.close_Loading_dialog()
+        emails = self.emails.split("\n")
+        success_nb = failed_nb-(len(emails)*len(self.recept))
+        log_message = str(success_nb)+"/"+str(len(emails)*len(self.recept))+" Users were added"
+        # for idx,space in enumerate(self.recept):
+        #     if idx == len(self.recept)-1:
+        #         log_message += space[1]
+        #     else:
+        #         log_message += space[1]+", "
+        idsonly = [x[0] for x in self.recept]
+        inserted_nb = db.insert_log(idsonly,log_message)
+        self.mainui.load_log_table("success")
         if message != "success":
             self.mainui.displaypopup(message)
             # self.popup_message(message)
@@ -984,7 +997,7 @@ class sendmessages(QtCore.QThread):
 
 class add_to_groups(QtCore.QThread):
     # sig_error_add = pyqtSignal(str)
-    sig_success_add = pyqtSignal(str)
+    sig_success_add = pyqtSignal(str,int)
 
     def __init__(self, *args, **kwargs):
         QThread.__init__(self)
@@ -999,7 +1012,7 @@ class add_to_groups(QtCore.QThread):
         message = "success"
         error_found = False
         error_message = ""
-        failed_nb = 0;
+        failed_nb = 0
         try:
             self.emails = self.emails.split("\n")
             for roomDetails in self.rooms:
@@ -1014,18 +1027,19 @@ class add_to_groups(QtCore.QThread):
                         json_resp = resp.json()
                         if 'errors' in json_resp:
                             error_found = True
+                            failed_nb += 1
                             error_message += json_resp.get("errors")[0].get('description') + " Room: " + roomDetails[
                                 1] + " (" + email.strip() + ")" + "\n"
                             # print(error_message)
                             # self.sig_error.emit(error_message)
 
         except Exception as e:
-            self.sig_success_add.emit(e)
+            self.sig_success_add.emit(e,failed_nb)
         # print(json_response['errors'])
         if error_found:
             message = "Finished Successfully, but there were some errors!\n"
             message += error_message
-        self.sig_success_add.emit(message)
+        self.sig_success_add.emit(message,failed_nb)
 
         # print(last_id)
 
