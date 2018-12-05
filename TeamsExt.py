@@ -999,6 +999,7 @@ class add_to_groups(QtCore.QThread):
         message = "success"
         error_found = False
         error_message = ""
+        failed_nb = 0;
         try:
             self.emails = self.emails.split("\n")
             for roomDetails in self.rooms:
