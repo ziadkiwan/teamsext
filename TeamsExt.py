@@ -23,7 +23,7 @@ import user_info as user
 import dbhelper as db
 import contact as ctct
 
-version = "0.4.1"
+version = "0.4.2"
 
 stored_accesstoken = ""
 
