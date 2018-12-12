@@ -151,7 +151,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
 
-
     def refresh_access_token(self):
         self.loadinguser()
         self.work = refresh_token()
@@ -159,12 +158,9 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.work.sig_success.connect(self.setupuserinfo)
         self.work.start()
 
-
     def error_refresh_profile(self, message):
         self.erroruser()
         self.displaypopup(message)
-
-
 
     def ordinaryway_access_token(self):
         self.browser = QWebEngineView()
@@ -385,7 +381,6 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         if len(recipients) == 0:
             self.displaypopup("No contacts were selected!")
             return
-        print(self.selected_fav)
         if self.selected_fav != "":
             messageid = db.insert_log(self.selected_fav, "Sending.....", False)
         else:
@@ -594,6 +589,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             print(e)
 
     def contacts_table_changed(self, tLeft, bRight):
+        self.selected_fav = ""
         nbofrows = self.contacts_table.model().rowCount()
         nbofreceipt = 0
         if (nbofrows == 0):
@@ -993,19 +989,19 @@ class getuserdetail(QtCore.QThread):
                 access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,
                                                headers=code_headers, verify=False)
                 access_resp = access_request.json()
-                storeauth(access_resp['access_token'])
-                storerefreshcode(access_resp['refresh_token'])
-                print(access_resp['access_token'])
+                if 'errors' in access_resp:
+                    error_message = access_resp.get("errors")[0].get('description')
+                    # print(error_message)
+                    self.sig_error.emit(error_message)
+                    return
+                else:
+                    storeauth(access_resp['access_token'])
+                    storerefreshcode(access_resp['refresh_token'])
             resp = requests.get("https://api.ciscospark.com/v1/people/me", headers=headers, verify=False)
             json_response = resp.json()
         except Exception as e:
             print(e)
         # print(json_response['errors'])
-        if not self.is_token:
-            if 'errors' in access_resp:
-                error_message = access_resp.get("errors")[0].get('description')
-                # print(error_message)
-                self.sig_error.emit(error_message)
         if 'errors' in json_response:
             error_message = json_response.get("errors")[0].get('description')
             # print(error_message)
@@ -1033,7 +1029,6 @@ class getuserdetail(QtCore.QThread):
         # gentable(self)
 
 
-
 class refresh_token(QtCore.QThread):
     sig_error = pyqtSignal(str)
     sig_success = pyqtSignal()
@@ -1042,27 +1037,30 @@ class refresh_token(QtCore.QThread):
         QThread.__init__(self)
         # self.signal = QtCore.SIGNAL("signal")
 
-
     def run(self):
         access_resp = "errors"
         json_response = "errors"
         try:
             # YOU NEED TO CREATE YOUR OWN CLIENT ID AND CLIENT SECRET!!!!!!!!!!!!!!!!!!!!!!
             code_headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
-            params = {'refresh_token': retreiverefreshcode(), 'grant_type': 'refresh_token', 'client_id': app_cfg.client_id,
-                          'client_secret': app_cfg.client_secret}
-            access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,headers=code_headers, verify=False)
+            params = {'refresh_token': retreiverefreshcode(), 'grant_type': 'refresh_token',
+                      'client_id': app_cfg.client_id,
+                      'client_secret': app_cfg.client_secret}
+            access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,
+                                           headers=code_headers, verify=False)
             access_resp = access_request.json()
-            storeauth(access_resp['access_token'])
+            if 'errors' in access_resp:
+                error_message = access_resp.get("errors")[0].get('description')
+                # print(error_message)
+                self.sig_error.emit(error_message)
+                return
+            else:
+                storeauth(access_resp['access_token'])
             resp = requests.get("https://api.ciscospark.com/v1/people/me", headers=headers, verify=False)
             json_response = resp.json()
         except Exception as e:
             self.sig_error.emit(str(e))
         # print(json_response['errors'])
-        if 'errors' in access_resp:
-                error_message = access_resp.get("errors")[0].get('description')
-                # print(error_message)
-                self.sig_error.emit(error_message)
         if 'errors' in json_response:
             error_message = json_response.get("errors")[0].get('description')
             # print(error_message)
@@ -1086,6 +1084,7 @@ class refresh_token(QtCore.QThread):
 
         # self.completed.emit("hello")
         # gentable(self)
+
 
 class sendmessages(QtCore.QThread):
     sig_error = pyqtSignal(str)

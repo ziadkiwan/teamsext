@@ -327,7 +327,7 @@ def load_log():
     try:
         conn = create_connection()
         cur = conn.cursor()
-        cur.execute("SELECT display,sent_time,message FROM logs ORDER BY id desc LIMIT 20")
+        cur.execute("SELECT display,sent_time,message FROM logs ORDER BY id desc")
         rows = cur.fetchall()
         # all = []
         # for row in rows:
