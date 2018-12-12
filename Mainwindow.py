@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\UI\mainwindow.ui'
+# Form implementation generated from reading ui file '.\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -165,7 +165,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.widget_8)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 26))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuMore = QtWidgets.QMenu(self.menuBar)
         self.menuMore.setObjectName("menuMore")
@@ -193,6 +193,12 @@ class Ui_MainWindow(object):
         self.actionImport.setObjectName("actionImport")
         self.actionVersion = QtWidgets.QAction(MainWindow)
         self.actionVersion.setObjectName("actionVersion")
+        self.actionSetup_Access_Token_2 = QtWidgets.QAction(MainWindow)
+        self.actionSetup_Access_Token_2.setObjectName("actionSetup_Access_Token_2")
+        self.actionRefresh_Access_Token = QtWidgets.QAction(MainWindow)
+        self.actionRefresh_Access_Token.setObjectName("actionRefresh_Access_Token")
+        self.menuMore.addAction(self.actionSetup_Access_Token_2)
+        self.menuMore.addAction(self.actionRefresh_Access_Token)
         self.menuMore.addAction(self.actionSetup_Access_Token)
         self.menuMore.addAction(self.actionClear_Logs)
         self.menuHelp.addAction(self.action_About)
@@ -226,7 +232,7 @@ class Ui_MainWindow(object):
         self.menuMore.setTitle(_translate("MainWindow", "Tools"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.menuAccount.setTitle(_translate("MainWindow", "Account"))
-        self.actionSetup_Access_Token.setText(_translate("MainWindow", "Setup Access Token"))
+        self.actionSetup_Access_Token.setText(_translate("MainWindow", "Input Access Token"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.action_About.setText(_translate("MainWindow", "About"))
         self.actionRemove_Account.setText(_translate("MainWindow", "Remove"))
@@ -234,4 +240,6 @@ class Ui_MainWindow(object):
         self.actionExport.setText(_translate("MainWindow", "Export"))
         self.actionImport.setText(_translate("MainWindow", "Import"))
         self.actionVersion.setText(_translate("MainWindow", "Version"))
+        self.actionSetup_Access_Token_2.setText(_translate("MainWindow", "Setup Access Token"))
+        self.actionRefresh_Access_Token.setText(_translate("MainWindow", "Refresh Access Token"))
 

@@ -5,9 +5,10 @@ import zipfile
 from datetime import time, datetime
 from itertools import islice
 
-from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant
+from PyQt5.QtCore import pyqtSignal, QThread, QAbstractTableModel, Qt, QVariant, QUrl
 from PyQt5.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QWidget
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 from Loadingdialog import Ui_Dialog as loadingui
 import Messagestemplate as msg_template
@@ -16,6 +17,8 @@ import Mainwindow as maingui
 import AuthDialog as adiag
 from PyQt5 import QtWidgets, QtCore, QtGui
 import sys
+
+import app_config as app_cfg
 
 import json
 import requests
@@ -38,6 +41,10 @@ contact_table_Headers = ["Title", "Select", "Type"]
 log_table_headers = ["Contacts", "Date", "Message"]
 message_templates_table_header = ["Id", "Message", "Select", "Remove"]
 favorites_table_header = ["Name", "Contacts", "Select", "Remove"]
+
+redirect_url = "https://github.com/ziadkiwan/teamsext"
+
+app_integration_url = "https://api.ciscospark.com/v1/authorize?client_id=Cd0541422a182f5e0e00344e3ea8f7fca7ddfecb5b8e56b7776c2cb8759210ca3&response_type=code&redirect_uri=https%3A%2F%2Fgithub.com%2Fziadkiwan%2Fteamsext&scope=spark-compliance%3Amemberships_read%20spark-admin%3Aresource_groups_read%20spark%3Aall%20spark-compliance%3Amemberships_write%20spark-admin%3Apeople_write%20spark-admin%3Aroles_read%20spark-admin%3Aorganizations_read%20spark-admin%3Aresource_group_memberships_read%20spark-admin%3Aresource_group_memberships_write%20spark-compliance%3Arooms_read%20spark-compliance%3Ateam_memberships_read%20spark-compliance%3Amessages_write%20spark-compliance%3Ateam_memberships_write%20spark%3Akms%20spark-compliance%3Ateams_read%20spark-compliance%3Amessages_read%20spark-admin%3Apeople_read&state=set_state_here"
 
 
 # class ContactsTableModel(QAbstractTableModel):
@@ -117,6 +124,7 @@ class extendmain(maingui.Ui_MainWindow):
         self.txt_msg.setPlaceholderText("Enter Your Message")
         self.btn_save_contacts.clicked.connect(self.save_contacts)
         self.btn_send.setDisabled(True)
+        self.actionSetup_Access_Token_2.triggered.connect(self.ordinaryway_access_token)
         # self.action_About.triggered.connect(lambda: self.displaypopup('fooData'))
         self.action_About.triggered.connect(lambda: self.displaypopup("""Thank you for using TeamsExt, created by Ziad Kiwan and Marc Khayat. This tool is provided "as is" and is neither supported nor backed by Cisco.
 Source code and latest release can be found at https://github.com/ziadkiwan/teamsext/
@@ -129,6 +137,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.actionVersion.setText("Version: " + version)
         self.txt_msg.textChanged.connect(self.txt_msg_txt_chnaged)
         self.btn_add_group.clicked.connect(self.add_to_group)
+        self.actionRefresh_Access_Token.triggered.connect(self.refresh_access_token)
         # self.createkey.clicked.connect(self.showCrkey)
         # self.importkey.clicked.connect(self.showimportdialog)
         # self.browsefile.clicked.connect(self.showfiledialog)
@@ -141,6 +150,44 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     #    keytable.setContextMenuPolicy(Qt.CustomContextMenu)
     #    keytable.customContextMenuRequested.connect(self.contextMenuEvent)
     #    windows.append(self)
+
+
+    def refresh_access_token(self):
+        self.loadinguser()
+        self.work = refresh_token()
+        self.work.sig_error.connect(self.error_refresh_profile)
+        self.work.sig_success.connect(self.setupuserinfo)
+        self.work.start()
+
+
+    def error_refresh_profile(self, message):
+        self.erroruser()
+        self.displaypopup(message)
+
+
+
+    def ordinaryway_access_token(self):
+        self.browser = QWebEngineView()
+        self.browser.setWindowTitle("Teams Authentication")
+        self.browser.load(QUrl(app_integration_url))
+        self.browser.titleChanged.connect(self.getwebtitle)
+        self.browser.show()
+
+    def getwebtitle(self, title):
+        if "https://github.com/ziadkiwan/teamsext" in title:
+            access_code = title[title.rfind('?') + 6:title.rfind('&')]
+            self.work = getuserdetail(access_token=access_code, is_token=False)
+            self.work.sig_error.connect(self.load_profile)
+            self.work.sig_success.connect(self.load_profile)
+            self.work.start()
+
+    def load_profile(self, message):
+        self.browser.close()
+        if message != "success":
+            self.displaypopup(message)
+        else:
+            self.setupuserinfo()
+            retrieveauth()
 
     def add_to_group(self):
         nbofrows = self.contacts_table.model().rowCount()
@@ -611,6 +658,18 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
             self.dialog.accept()
 
 
+def storerefreshcode(code):
+    with shelve.open('config', 'c') as shelf:
+        shelf['access_code'] = code
+
+
+def retreiverefreshcode():
+    with shelve.open('config', 'c') as shelf:
+        if (shelf):
+            access_code = shelf['access_code']
+            return access_code
+
+
 def storeauth(access_token):
     with shelve.open('config', 'c') as shelf:
         global stored_accesstoken
@@ -862,15 +921,15 @@ class Authdialog(adiag.Ui_Dialog):
     def add_result(self, message, failed_nb):
         self.mainui.close_Loading_dialog()
         emails = self.emails.split("\n")
-        success_nb = (len(emails)*len(self.recept))-failed_nb
-        log_message = str(success_nb)+"/"+str(len(emails)*len(self.recept))+" Users were added"
+        success_nb = (len(emails) * len(self.recept)) - failed_nb
+        log_message = str(success_nb) + "/" + str(len(emails) * len(self.recept)) + " Users were added"
         # for idx,space in enumerate(self.recept):
         #     if idx == len(self.recept)-1:
         #         log_message += space[1]
         #     else:
         #         log_message += space[1]+", "
         idsonly = [x[0] for x in self.recept]
-        inserted_nb = db.insert_log(idsonly,log_message)
+        inserted_nb = db.insert_log(idsonly, log_message)
         self.mainui.load_log_table("success")
         if message != "success":
             self.mainui.displaypopup(message)
@@ -910,7 +969,6 @@ class Authdialog(adiag.Ui_Dialog):
 
 
 class getuserdetail(QtCore.QThread):
-    access_token = ""
     sig_error = pyqtSignal(str)
     sig_success = pyqtSignal(str)
 
@@ -919,16 +977,35 @@ class getuserdetail(QtCore.QThread):
         # self.signal = QtCore.SIGNAL("signal")
         self.Init(*args, **kwargs)
 
-    def Init(self, access_token):
+    def Init(self, access_token, is_token=True):
         self.access_token = access_token
+        self.is_token = is_token
 
     def run(self):
+        access_resp = "errors"
+        json_response = "errors"
         try:
+            if not self.is_token:
+                code_headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+                # YOU NEED TO CREATE YOUR OWN CLIENT ID AND CLIENT SECRET!!!!!!!!!!!!!!!!!!!!!!
+                params = {'code': self.access_token, 'grant_type': 'authorization_code', 'client_id': app_cfg.client_id,
+                          'client_secret': app_cfg.client_secret, 'redirect_uri': redirect_url}
+                access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,
+                                               headers=code_headers, verify=False)
+                access_resp = access_request.json()
+                storeauth(access_resp['access_token'])
+                storerefreshcode(access_resp['refresh_token'])
+                print(access_resp['access_token'])
             resp = requests.get("https://api.ciscospark.com/v1/people/me", headers=headers, verify=False)
             json_response = resp.json()
         except Exception as e:
             print(e)
         # print(json_response['errors'])
+        if not self.is_token:
+            if 'errors' in access_resp:
+                error_message = access_resp.get("errors")[0].get('description')
+                # print(error_message)
+                self.sig_error.emit(error_message)
         if 'errors' in json_response:
             error_message = json_response.get("errors")[0].get('description')
             # print(error_message)
@@ -947,13 +1024,68 @@ class getuserdetail(QtCore.QThread):
                                           nickname=json_response['nickName'], avatar=photoname)
             last_id = db.insert_user_info(current_user)
             current_user.id = last_id
-            storeauth(access_token=self.access_token)
+            if self.is_token:
+                storeauth(access_token=self.access_token)
             self.sig_success.emit("success")
         # print(last_id)
 
         # self.completed.emit("hello")
         # gentable(self)
 
+
+
+class refresh_token(QtCore.QThread):
+    sig_error = pyqtSignal(str)
+    sig_success = pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        QThread.__init__(self)
+        # self.signal = QtCore.SIGNAL("signal")
+
+
+    def run(self):
+        access_resp = "errors"
+        json_response = "errors"
+        try:
+            # YOU NEED TO CREATE YOUR OWN CLIENT ID AND CLIENT SECRET!!!!!!!!!!!!!!!!!!!!!!
+            code_headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+            params = {'refresh_token': retreiverefreshcode(), 'grant_type': 'refresh_token', 'client_id': app_cfg.client_id,
+                          'client_secret': app_cfg.client_secret}
+            access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,headers=code_headers, verify=False)
+            access_resp = access_request.json()
+            storeauth(access_resp['access_token'])
+            resp = requests.get("https://api.ciscospark.com/v1/people/me", headers=headers, verify=False)
+            json_response = resp.json()
+        except Exception as e:
+            self.sig_error.emit(str(e))
+        # print(json_response['errors'])
+        if 'errors' in access_resp:
+                error_message = access_resp.get("errors")[0].get('description')
+                # print(error_message)
+                self.sig_error.emit(error_message)
+        if 'errors' in json_response:
+            error_message = json_response.get("errors")[0].get('description')
+            # print(error_message)
+            self.sig_error.emit(error_message)
+        else:
+            db.clear_all_users()
+            photoname = '00000001.jpg'
+            f = open(photoname, 'wb')
+            with urllib.request.urlopen(json_response['avatar']) as url:
+                picture = url.read()
+            f.write(picture)
+            f.close()
+            global current_user
+            current_user = user.user_info(id="new", email=json_response['emails'][0],
+                                          displayname=json_response['displayName'],
+                                          nickname=json_response['nickName'], avatar=photoname)
+            last_id = db.insert_user_info(current_user)
+            current_user.id = last_id
+            self.sig_success.emit()
+        # print(last_id)
+
+        # self.completed.emit("hello")
+        # gentable(self)
 
 class sendmessages(QtCore.QThread):
     sig_error = pyqtSignal(str)
@@ -996,7 +1128,7 @@ class sendmessages(QtCore.QThread):
 
 class add_to_groups(QtCore.QThread):
     # sig_error_add = pyqtSignal(str)
-    sig_success_add = pyqtSignal(str,int)
+    sig_success_add = pyqtSignal(str, int)
 
     def __init__(self, *args, **kwargs):
         QThread.__init__(self)
@@ -1033,12 +1165,12 @@ class add_to_groups(QtCore.QThread):
                             # self.sig_error.emit(error_message)
 
         except Exception as e:
-            self.sig_success_add.emit(e,failed_nb)
+            self.sig_success_add.emit(e, failed_nb)
         # print(json_response['errors'])
         if error_found:
             message = "Finished Successfully, but there were some errors!\n"
             message += error_message
-        self.sig_success_add.emit(message,failed_nb)
+        self.sig_success_add.emit(message, failed_nb)
 
         # print(last_id)
 
