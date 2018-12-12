@@ -168,7 +168,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
         self.browser.show()
 
     def getwebtitle(self, title):
-        if "https://github.com/ziadkiwan/teamsext" in title:
+        if app_cfg.redirect_url in title:
             access_code = title[title.rfind('?') + 6:title.rfind('&')]
             self.work = getuserdetail(access_token=access_code, is_token=False)
             self.work.sig_error.connect(self.load_profile)
