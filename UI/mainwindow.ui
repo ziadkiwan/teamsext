@@ -239,7 +239,7 @@ background-color : blue
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMore">
@@ -313,7 +313,7 @@ background-color : blue
   </action>
   <action name="actionSetup_Access_Token_2">
    <property name="text">
-    <string>Setup Access Token</string>
+    <string>Get Access Token</string>
    </property>
   </action>
   <action name="actionRefresh_Access_Token">

@@ -42,9 +42,7 @@ log_table_headers = ["Contacts", "Date", "Message"]
 message_templates_table_header = ["Id", "Message", "Select", "Remove"]
 favorites_table_header = ["Name", "Contacts", "Select", "Remove"]
 
-redirect_url = "https://github.com/ziadkiwan/teamsext"
 
-app_integration_url = "https://api.ciscospark.com/v1/authorize?client_id=Cd0541422a182f5e0e00344e3ea8f7fca7ddfecb5b8e56b7776c2cb8759210ca3&response_type=code&redirect_uri=https%3A%2F%2Fgithub.com%2Fziadkiwan%2Fteamsext&scope=spark-compliance%3Amemberships_read%20spark-admin%3Aresource_groups_read%20spark%3Aall%20spark-compliance%3Amemberships_write%20spark-admin%3Apeople_write%20spark-admin%3Aroles_read%20spark-admin%3Aorganizations_read%20spark-admin%3Aresource_group_memberships_read%20spark-admin%3Aresource_group_memberships_write%20spark-compliance%3Arooms_read%20spark-compliance%3Ateam_memberships_read%20spark-compliance%3Amessages_write%20spark-compliance%3Ateam_memberships_write%20spark%3Akms%20spark-compliance%3Ateams_read%20spark-compliance%3Amessages_read%20spark-admin%3Apeople_read&state=set_state_here"
 
 
 # class ContactsTableModel(QAbstractTableModel):
@@ -165,7 +163,7 @@ For feedback and suggestions, please contact ziad_kiwan_1992@hotmail.com."""))
     def ordinaryway_access_token(self):
         self.browser = QWebEngineView()
         self.browser.setWindowTitle("Teams Authentication")
-        self.browser.load(QUrl(app_integration_url))
+        self.browser.load(QUrl(app_cfg.app_integration_url))
         self.browser.titleChanged.connect(self.getwebtitle)
         self.browser.show()
 
@@ -985,7 +983,7 @@ class getuserdetail(QtCore.QThread):
                 code_headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
                 # YOU NEED TO CREATE YOUR OWN CLIENT ID AND CLIENT SECRET!!!!!!!!!!!!!!!!!!!!!!
                 params = {'code': self.access_token, 'grant_type': 'authorization_code', 'client_id': app_cfg.client_id,
-                          'client_secret': app_cfg.client_secret, 'redirect_uri': redirect_url}
+                          'client_secret': app_cfg.client_secret, 'redirect_uri': app_cfg.redirect_url}
                 access_request = requests.post("https://api.ciscospark.com/v1/access_token", params=params,
                                                headers=code_headers, verify=False)
                 access_resp = access_request.json()

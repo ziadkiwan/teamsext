@@ -165,7 +165,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.widget_8)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 801, 26))
         self.menuBar.setObjectName("menuBar")
         self.menuMore = QtWidgets.QMenu(self.menuBar)
         self.menuMore.setObjectName("menuMore")
@@ -240,6 +240,6 @@ class Ui_MainWindow(object):
         self.actionExport.setText(_translate("MainWindow", "Export"))
         self.actionImport.setText(_translate("MainWindow", "Import"))
         self.actionVersion.setText(_translate("MainWindow", "Version"))
-        self.actionSetup_Access_Token_2.setText(_translate("MainWindow", "Setup Access Token"))
+        self.actionSetup_Access_Token_2.setText(_translate("MainWindow", "Get Access Token"))
         self.actionRefresh_Access_Token.setText(_translate("MainWindow", "Refresh Access Token"))
 
