@@ -7,7 +7,7 @@ AIOHTTP
 REQUESTS
 
 
-Please create a file called app_config.py:
+Please create a file called app_config.py and add the following variables:
 
 client_id = "<<your_client_id>>"
 client_secret = "<<your_client_secret>>"
